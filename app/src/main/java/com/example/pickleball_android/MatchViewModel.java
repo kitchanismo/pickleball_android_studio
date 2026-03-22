@@ -1,7 +1,6 @@
 package com.example.pickleball_android;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 public class MatchViewModel extends ViewModel {
@@ -26,10 +25,10 @@ public class MatchViewModel extends ViewModel {
         }
     }
 
-    private MutableLiveData<CURRENT_SERVING_TEAM> currentServingTeam = new MutableLiveData<>(CURRENT_SERVING_TEAM.TEAM_BLUE);
-    private MutableLiveData<SERVER> server = new MutableLiveData<>(SERVER.TWO);
-    private MutableLiveData<Integer> blueScore = new MutableLiveData<>(0);
-    private MutableLiveData<Integer> redScore = new MutableLiveData<>(0);
+    private SkippableLiveData<CURRENT_SERVING_TEAM> currentServingTeam = new SkippableLiveData<>(CURRENT_SERVING_TEAM.TEAM_BLUE);
+    private SkippableLiveData<SERVER> server = new SkippableLiveData<>(SERVER.TWO);
+    private SkippableLiveData<Integer> blueScore = new SkippableLiveData<>(0);
+    private SkippableLiveData<Integer> redScore = new SkippableLiveData<>(0);
 
     public LiveData<CURRENT_SERVING_TEAM> getCurrentServingTeam() {
         return this.currentServingTeam;

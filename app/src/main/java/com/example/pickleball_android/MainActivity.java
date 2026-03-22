@@ -58,7 +58,24 @@ public class MainActivity extends AppCompatActivity {
             txtScore.setText(score);
         });
 
+        binding.imgServingBlueTop.setVisibility(View.VISIBLE);
 
+        viewModel.getServer().observe(this, server -> {
+            if (viewModel.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE) {
+                if (binding.imgServingBlueBottom.getVisibility() == View.VISIBLE) {
+                    binding.imgServingBlueBottom.setVisibility(View.INVISIBLE);
+                } else {
+                    binding.imgServingBlueBottom.setVisibility(View.VISIBLE);
+                }
+                if (binding.imgServingBlueTop.getVisibility() == View.VISIBLE) {
+                    binding.imgServingBlueTop.setVisibility(View.INVISIBLE);
+                } else {
+                    binding.imgServingBlueTop.setVisibility(View.VISIBLE);
+                }
+
+            }
+
+        });
     }
 
     public void onBtnScoreListener(View v) {
@@ -70,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             String txtPlayerBlueBottomValue = binding.txtPlayerBlueBottom.getText().toString();
             binding.txtPlayerBlueTop.setText(txtPlayerBlueBottomValue);
             binding.txtPlayerBlueBottom.setText(txtPlayerBlueTopValue);
-
+            viewModel.setServer(viewModel.getServer().getValue() == MatchViewModel.SERVER.ONE ? MatchViewModel.SERVER.TWO : MatchViewModel.SERVER.ONE);
         }
 
     }
