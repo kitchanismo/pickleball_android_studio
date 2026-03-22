@@ -45,12 +45,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         onFullScreen();
 
         viewModel = new ViewModelProvider(this).get(MatchViewModel.class);
-        TextView txtScore = findViewById(R.id.kitchen_layout).findViewById(R.id.txtScore);
+        TextView txtScore = binding.kitchenLayout.findViewById(R.id.txtScore);
 
         viewModel.getBlueScore().observe(this, blueScore -> {
             String score = String.join("-", blueScore + "", viewModel.getRedScore().getValue() + "", viewModel.getServer().getValue().getValue() + "");
@@ -62,7 +63,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void onBtnScoreListener(View v) {
         //scoring
-        viewModel.setBlueScore(viewModel.getBlueScore().getValue() + 1);
+
+        if (viewModel.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE) {
+            viewModel.setBlueScore(viewModel.getBlueScore().getValue() + 1);
+            String txtPlayerBlueTopValue = binding.txtPlayerBlueTop.getText().toString();
+            String txtPlayerBlueBottomValue = binding.txtPlayerBlueBottom.getText().toString();
+            binding.txtPlayerBlueTop.setText(txtPlayerBlueBottomValue);
+            binding.txtPlayerBlueBottom.setText(txtPlayerBlueTopValue);
+
+        }
 
     }
 }
