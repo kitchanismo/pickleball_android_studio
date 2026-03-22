@@ -55,7 +55,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <com.example.pickleball_android.CourtSide
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/court_side_red_top"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -67,11 +67,35 @@
                     app:layout_constraintBottom_toTopOf="@id/court_side_red_bottom"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:matchScore="@{viewModel.matchScore}"
-                    app:playerName="Player 4" />
+                    app:layout_constraintTop_toTopOf="parent">
 
-                <com.example.pickleball_android.CourtSide
+                    <ImageView
+                        android:id="@+id/img_serving_red_top"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="48dp"
+                        android:contentDescription="Serving Indicator"
+                        android:src="@drawable/baseline_sports_baseball_24"
+                        android:visibility="invisible"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.499"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txt_player_red_top"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Player 4"
+                        android:textColor="@color/white"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/img_serving_red_top"
+                        app:layout_constraintVertical_bias="0.197" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/court_side_red_bottom"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -83,9 +107,33 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/court_side_red_top"
-                    app:matchScore="@{viewModel.matchScore}"
-                    app:playerName="Player 3" />
+                    app:layout_constraintTop_toBottomOf="@id/court_side_red_top">
+
+                    <ImageView
+                        android:id="@+id/img_serving_red_bottom"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="48dp"
+                        android:contentDescription="Serving Indicator"
+                        android:src="@drawable/baseline_sports_baseball_24"
+                        android:visibility="invisible"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.499"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txtPlayer_red_bottom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Player 3"
+                        android:textColor="@color/white"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/img_serving_red_bottom"
+                        app:layout_constraintVertical_bias="0.197" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -108,7 +156,7 @@
                 app:layout_constraintStart_toEndOf="@id/kitchen_layout"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <com.example.pickleball_android.CourtSide
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/court_side_blue_top"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -120,11 +168,35 @@
                     app:layout_constraintBottom_toTopOf="@id/court_side_blue_bottom"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:matchScore="@{viewModel.matchScore}"
-                    app:playerName="Player 1" />
+                    app:layout_constraintTop_toTopOf="parent">
 
-                <com.example.pickleball_android.CourtSide
+                    <ImageView
+                        android:id="@+id/img_serving_blue_top"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="48dp"
+                        android:contentDescription="Serving Indicator"
+                        android:src="@drawable/baseline_sports_baseball_24"
+                        android:visibility="invisible"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.499"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txtPlayer_blue_top"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Player 1"
+                        android:textColor="@color/white"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/img_serving_blue_top"
+                        app:layout_constraintVertical_bias="0.197" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/court_side_blue_bottom"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -136,9 +208,33 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/court_side_blue_top"
-                    app:matchScore="@{viewModel.matchScore}"
-                    app:playerName="Player 2" />
+                    app:layout_constraintTop_toBottomOf="@id/court_side_blue_top">
+
+                    <ImageView
+                        android:id="@+id/img_serving_blue_bottom"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginTop="48dp"
+                        android:contentDescription="Serving Indicator"
+                        android:src="@drawable/baseline_sports_baseball_24"
+                        android:visibility="invisible"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.499"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/txtPlayer_blue_bottom"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Player 2"
+                        android:textColor="@color/white"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/img_serving_blue_bottom"
+                        app:layout_constraintVertical_bias="0.197" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>

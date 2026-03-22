@@ -1,8 +1,6 @@
 package com.example.pickleball_android;
 
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,11 +8,15 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
+
+import com.example.pickleball_android.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
     private MatchViewModel viewModel;
+    private ActivityMainBinding binding;
 
     private void onFullScreen() {
         EdgeToEdge.enable(this);
@@ -41,27 +43,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         onFullScreen();
 
         viewModel = new ViewModelProvider(this).get(MatchViewModel.class);
 
-        Button btnScore = findViewById(R.id.btn_score);
 
-        // Find the CourtSide views
-        TextView txtPlayerTop = findViewById(R.id.court_side_red_top).findViewById(R.id.txtPlayer);
-        TextView txtPlayerBottom = findViewById(R.id.court_side_red_bottom).findViewById(R.id.txtPlayer);
-
-        btnScore.setOnClickListener(v -> {
-            String playerNameRedTop = txtPlayerTop.getText().toString();
-            String playerNameRedBottom = txtPlayerBottom.getText().toString();
-            txtPlayerTop.setText(playerNameRedBottom);
-            txtPlayerBottom.setText(playerNameRedTop);
-        });
-
-        // Observe LiveData and update both TextViews
-        viewModel.playerName.observe(this, playerName -> {
-
-        });
     }
 }
