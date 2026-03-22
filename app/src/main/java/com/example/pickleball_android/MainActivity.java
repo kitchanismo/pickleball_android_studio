@@ -14,7 +14,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 public class MainActivity extends AppCompatActivity {
 
-    private GameViewModel viewModel;
+    private MatchViewModel viewModel;
 
     private void onFullScreen() {
         EdgeToEdge.enable(this);
@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         onFullScreen();
 
-        viewModel = new ViewModelProvider(this).get(GameViewModel.class);
+        viewModel = new ViewModelProvider(this).get(MatchViewModel.class);
 
         Button btnFault = findViewById(R.id.btn_fault);
 
