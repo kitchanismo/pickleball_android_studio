@@ -1,6 +1,8 @@
 package com.example.pickleball_android;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,7 +10,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
-import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.pickleball_android.databinding.ActivityMainBinding;
@@ -16,6 +17,7 @@ import com.example.pickleball_android.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity {
 
     private MatchViewModel viewModel;
+
     private ActivityMainBinding binding;
 
     private void onFullScreen() {
@@ -43,11 +45,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        setContentView(R.layout.activity_main);
+
         onFullScreen();
 
         viewModel = new ViewModelProvider(this).get(MatchViewModel.class);
+        TextView txtScore = findViewById(R.id.kitchen_layout).findViewById(R.id.txtScore);
 
+        viewModel.getBlueScore().observe(this, blueScore -> {
+            String score = String.join("-", blueScore + "", viewModel.getRedScore().getValue() + "", viewModel.getServer().getValue().getValue() + "");
+            txtScore.setText(score);
+        });
+
+
+    }
+
+    public void onBtnScoreListener(View v) {
+        //scoring
+        viewModel.setBlueScore(viewModel.getBlueScore().getValue() + 1);
 
     }
 }
