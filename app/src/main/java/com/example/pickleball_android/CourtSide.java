@@ -21,14 +21,17 @@ public class CourtSide extends ConstraintLayout {
         txtPlayer = findViewById(R.id.txtPlayer);
         imgServing = findViewById(R.id.img_serving);
 
-        if (attrs != null) {
-            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CourtSide);
-            String playerName = a.getString(R.styleable.CourtSide_playerName);
-            teamSide = a.getInt(R.styleable.CourtSide_currentServingTeam, -1);
-            
-            setPlayerName(playerName != null ? playerName : "");
-            a.recycle();
+        if (attrs == null) {
+            return;
         }
+
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CourtSide);
+        String playerName = a.getString(R.styleable.CourtSide_playerName);
+//        teamSide = a.getInt(R.styleable.CourtSide_currentServingTeam, -1);
+//
+//        setPlayerName(playerName != null ? playerName : "");
+        a.recycle();
+
     }
 
     public void setPlayerName(String text) {
@@ -39,15 +42,22 @@ public class CourtSide extends ConstraintLayout {
 
     @BindingAdapter("matchScore")
     public static void setMatchScore(CourtSide view, MatchScore score) {
-        if (score == null || view.imgServing == null || view.teamSide == -1) return;
+        System.out.println("score:" + score);
+        if (score.getCurrentServingTeam() == MatchScore.CURRENT_SERVING_TEAM.TEAM_BLUE) {
+            if (score.getServer() == MatchScore.SERVER.TWO) {
+                view.findViewById(R.id.court_side_blue_top).findViewById(R.id.img_serving).setVisibility(View.VISIBLE);
+            }
 
-        boolean isRedServing = score.getCurrentServingTeam() == MatchScore.CURRENT_SERVING_TEAM.TEAM_RED;
-        boolean isBlueServing = score.getCurrentServingTeam() == MatchScore.CURRENT_SERVING_TEAM.TEAM_BLUE;
-
-        if (view.teamSide == 0) { // Red Team
-            view.imgServing.setVisibility(isRedServing ? View.VISIBLE : View.INVISIBLE);
-        } else if (view.teamSide == 1) { // Blue Team
-            view.imgServing.setVisibility(isBlueServing ? View.VISIBLE : View.INVISIBLE);
         }
+//        if (score == null || view.imgServing == null || view.teamSide == -1) return;
+//
+//        boolean isRedServing = score.getCurrentServingTeam() == MatchScore.CURRENT_SERVING_TEAM.TEAM_RED;
+//        boolean isBlueServing = score.getCurrentServingTeam() == MatchScore.CURRENT_SERVING_TEAM.TEAM_BLUE;
+//
+//        if (view.teamSide == 0) { // Red Team
+//            view.imgServing.setVisibility(isRedServing ? View.VISIBLE : View.INVISIBLE);
+//        } else if (view.teamSide == 1) { // Blue Team
+//            view.imgServing.setVisibility(isBlueServing ? View.VISIBLE : View.INVISIBLE);
+//        }
     }
 }

@@ -46,13 +46,13 @@ public class MainActivity extends AppCompatActivity {
 
         viewModel = new ViewModelProvider(this).get(MatchViewModel.class);
 
-        Button btnFault = findViewById(R.id.btn_fault);
+        Button btnScore = findViewById(R.id.btn_score);
 
         // Find the CourtSide views
         TextView txtPlayerTop = findViewById(R.id.court_side_red_top).findViewById(R.id.txtPlayer);
         TextView txtPlayerBottom = findViewById(R.id.court_side_red_bottom).findViewById(R.id.txtPlayer);
 
-        btnFault.setOnClickListener(v -> {
+        btnScore.setOnClickListener(v -> {
             String playerNameRedTop = txtPlayerTop.getText().toString();
             String playerNameRedBottom = txtPlayerBottom.getText().toString();
             txtPlayerTop.setText(playerNameRedBottom);
