@@ -2,5 +2,9 @@
 <resources>
     <declare-styleable name="CourtSide">
         <attr name="playerName" format="string" />
+        <attr name="currentServingTeam" format="enum">
+            <enum name="team_red" value="0" />
+            <enum name="team_blue" value="1" />
+        </attr>
     </declare-styleable>
 </resources>
