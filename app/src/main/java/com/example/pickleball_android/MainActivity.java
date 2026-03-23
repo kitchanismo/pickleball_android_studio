@@ -180,15 +180,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showWinnerDialog(String winnerMessage) {
-        new AlertDialog.Builder(this)
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Game Over")
                 .setMessage(winnerMessage)
-                .setPositiveButton("OK", (dialog, which) -> {
-                    dialog.dismiss();
+                .setPositiveButton("OK", (dialogInterface, which) -> {
+                    dialogInterface.dismiss();
                     viewModel.setGameIsOver(false);
                 })
                 .setCancelable(false)
-                .show();
+                .create();
+
+        dialog.show();
+
+        if (dialog.getWindow() != null) {
+            WindowInsetsControllerCompat windowInsetsController =
+                    ViewCompat.getWindowInsetsController(dialog.getWindow().getDecorView());
+            if (windowInsetsController != null) {
+                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
+                windowInsetsController.setSystemBarsBehavior(
+                        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                );
+            }
+        }
     }
 
     public void onBtnScoreListener(View v) {
