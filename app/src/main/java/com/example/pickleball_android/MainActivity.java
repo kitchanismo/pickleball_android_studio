@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -97,9 +98,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         viewModel.getGameIsOver().observe(this, isGameOver -> {
-//            if (viewModel.getGameIsOver().getValue()) {
-//                return;
-//            }
+            if (!viewModel.getGameIsOver().getValue()) {
+                return;
+            }
             viewModel.setCurrentServingTeam(MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
             viewModel.setServer(MatchViewModel.SERVER.TWO);
             viewModel.setBlueScore(0);
@@ -125,6 +126,8 @@ public class MainActivity extends AppCompatActivity {
             if (viewModel.getBlueScore().getValue() >= 11 && winBlue >= 2) {
                 System.out.println("Blue Wins");
                 viewModel.setGameIsOver(true);
+                showWinnerDialog("Blue Team Wins!");
+
                 return;
             }
 
@@ -154,6 +157,8 @@ public class MainActivity extends AppCompatActivity {
             if (viewModel.getRedScore().getValue() >= 11 && winRed >= 2) {
                 System.out.println("Red Wins");
                 viewModel.setGameIsOver(true);
+                showWinnerDialog("Red Team Wins!");
+
                 return;
             }
 
@@ -172,6 +177,18 @@ public class MainActivity extends AppCompatActivity {
             txtScore.setText(scoreText);
 
         });
+    }
+
+    private void showWinnerDialog(String winnerMessage) {
+        new AlertDialog.Builder(this)
+                .setTitle("Game Over")
+                .setMessage(winnerMessage)
+                .setPositiveButton("OK", (dialog, which) -> {
+                    dialog.dismiss();
+                    viewModel.setGameIsOver(false);
+                })
+                .setCancelable(false)
+                .show();
     }
 
     public void onBtnScoreListener(View v) {
