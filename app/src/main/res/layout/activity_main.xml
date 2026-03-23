@@ -132,7 +132,7 @@
 
         <com.example.pickleball_android.KitchenLayout
             android:id="@+id/kitchen_layout"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="match_parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/court_side_blue"
