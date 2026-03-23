@@ -57,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
         binding.imgServingBlueTop.setVisibility(View.VISIBLE);
 
         viewModel.getCurrentServingTeam().observe(this, currentServingTeam -> {
+            if (viewModel.getGameIsOver().getValue()) {
+                return;
+            }
             Boolean isBlue = viewModel.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
             //  viewModel.setCurrentServingTeam(isBlue ? MatchViewModel.CURRENT_SERVING_TEAM.TEAM_RED : MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
             if (!isBlue) {
@@ -77,6 +80,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         viewModel.getServer().observe(this, server -> {
+            if (viewModel.getGameIsOver().getValue()) {
+                return;
+            }
             Button btnFault = binding.kitchenLayout.findViewById(R.id.btn_fault);
             btnFault.setText(server == MatchViewModel.SERVER.ONE ? "FAULT" : "SIDEOUT");
             Boolean isBlue = viewModel.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
@@ -90,15 +96,40 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        viewModel.getBlueScore().observe(this, score -> {
-
-            String scoreText = String.join("-", score + "", viewModel.getRedScore().getValue() + "", viewModel.getServer().getValue().getValue() + "");
-            txtScore.setText(scoreText);
-
-//            if (!viewModel.getHasInitialized().getValue()) {
-//                viewModel.setHasInitialized(true);
+        viewModel.getGameIsOver().observe(this, isGameOver -> {
+//            if (viewModel.getGameIsOver().getValue()) {
 //                return;
 //            }
+            viewModel.setCurrentServingTeam(MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
+            viewModel.setServer(MatchViewModel.SERVER.TWO);
+            viewModel.setBlueScore(0);
+            viewModel.setRedScore(0);
+            String scoreText = String.join("-", "0", "0", "2");
+            binding.imgServingBlueTop.setVisibility(View.VISIBLE);
+            binding.imgServingBlueBottom.setVisibility(View.INVISIBLE);
+            binding.imgServingRedTop.setVisibility(View.INVISIBLE);
+            binding.imgServingRedBottom.setVisibility(View.INVISIBLE);
+            binding.txtPlayerBlueTop.setText("Player 1");
+            binding.txtPlayerBlueBottom.setText("Player 2");
+            binding.txtPlayerRedBottom.setText("Player 4");
+            binding.txtPlayerRedTop.setText("Player 3");
+            txtScore.setText(scoreText);
+        });
+
+        viewModel.getBlueScore().observe(this, blueScore -> {
+            if (viewModel.getGameIsOver().getValue()) {
+                return;
+            }
+
+            Integer winBlue = viewModel.getBlueScore().getValue() - viewModel.getRedScore().getValue();
+            if (viewModel.getBlueScore().getValue() >= 11 && winBlue >= 2) {
+                System.out.println("Blue Wins");
+                viewModel.setGameIsOver(true);
+                return;
+            }
+
+            String scoreText = String.join("-", blueScore + "", viewModel.getRedScore().getValue() + "", viewModel.getServer().getValue().getValue() + "");
+            txtScore.setText(scoreText);
 
             if (binding.imgServingBlueBottom.getVisibility() == View.VISIBLE) {
                 binding.imgServingBlueBottom.setVisibility(View.INVISIBLE);
@@ -114,11 +145,18 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-        viewModel.getRedScore().observe(this, score -> {
-//            if (!viewModel.getHasInitialized().getValue()) {
-//                viewModel.setHasInitialized(true);
-//                return;
-//            }
+        viewModel.getRedScore().observe(this, redScore -> {
+            if (viewModel.getGameIsOver().getValue()) {
+                return;
+            }
+
+            Integer winRed = viewModel.getRedScore().getValue() - viewModel.getBlueScore().getValue();
+            if (viewModel.getRedScore().getValue() >= 11 && winRed >= 2) {
+                System.out.println("Red Wins");
+                viewModel.setGameIsOver(true);
+                return;
+            }
+
             if (binding.imgServingRedBottom.getVisibility() == View.VISIBLE) {
                 binding.imgServingRedBottom.setVisibility(View.INVISIBLE);
             } else {
@@ -130,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                 binding.imgServingRedTop.setVisibility(View.VISIBLE);
             }
 
-            String scoreText = String.join("-", score + "", viewModel.getBlueScore().getValue() + "", viewModel.getServer().getValue().getValue() + "");
+            String scoreText = String.join("-", redScore + "", viewModel.getBlueScore().getValue() + "", viewModel.getServer().getValue().getValue() + "");
             txtScore.setText(scoreText);
 
         });

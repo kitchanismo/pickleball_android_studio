@@ -31,14 +31,14 @@ public class MatchViewModel extends ViewModel {
     private SkippableLiveData<Integer> blueScore = new SkippableLiveData<>(0);
     private SkippableLiveData<Integer> redScore = new SkippableLiveData<>(0);
 
-    private SkippableLiveData<Boolean> hasInitialized = new SkippableLiveData<>(false);
+    private SkippableLiveData<Boolean> isGameOver = new SkippableLiveData<>(false);
 
-    public LiveData<Boolean> getHasInitialized() {
-        return this.hasInitialized;
+    public LiveData<Boolean> getGameIsOver() {
+        return this.isGameOver;
     }
 
-    public void setHasInitialized(boolean hasInitialized) {
-        this.hasInitialized.setValue(hasInitialized);
+    public void setGameIsOver(boolean isGameOver) {
+        this.isGameOver.setValue(isGameOver);
     }
 
     public LiveData<CURRENT_SERVING_TEAM> getCurrentServingTeam() {
