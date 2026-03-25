@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         viewModel = new ViewModelProvider(this).get(MatchViewModel.class);
 
         // UI refresh triggers for serving team and server number changes
-        viewModel.getCurrentServingTeam().observe(this, team -> refreshUI());
+        viewModel.getCurrentServingTeam().observe(this, team -> refreshUICurrentTeam(team));
         viewModel.getServer().observe(this, server -> refreshUI());
 
         // Score logic triggers
@@ -81,6 +81,24 @@ public class MainActivity extends AppCompatActivity {
         if (isGameOver()) return;
         updateScoreText();
         updateButtonLabels();
+    }
+
+    private void refreshUICurrentTeam(MatchViewModel.CURRENT_SERVING_TEAM team) {
+        if (isGameOver()) return;
+        updateScoreText();
+        updateButtonLabels();
+        if (team == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE) {
+            binding.imgServingBlueTop.setVisibility(View.VISIBLE);
+            binding.imgServingBlueBottom.setVisibility(View.INVISIBLE);
+            binding.imgServingRedTop.setVisibility(View.INVISIBLE);
+            binding.imgServingRedBottom.setVisibility(View.INVISIBLE);
+        } else {
+            binding.imgServingBlueTop.setVisibility(View.INVISIBLE);
+            binding.imgServingBlueBottom.setVisibility(View.INVISIBLE);
+            binding.imgServingRedTop.setVisibility(View.INVISIBLE);
+            binding.imgServingRedBottom.setVisibility(View.VISIBLE);
+        }
+        
     }
 
     /**
