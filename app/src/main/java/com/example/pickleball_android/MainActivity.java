@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.pickleball_android.databinding.ActivityMainBinding;
 
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -25,7 +26,8 @@ import java.util.Locale;
  */
 public class MainActivity extends AppCompatActivity {
 
-    private MatchViewModel viewModel;
+    private MatchViewModel vmMatch;
+
     private ActivityMainBinding binding;
     private TextView txtScore;
     private Button btnFault;
@@ -56,18 +58,18 @@ public class MainActivity extends AppCompatActivity {
      * Initializes the ViewModel and sets up observers for data changes.
      */
     private void setupViewModel() {
-        viewModel = new ViewModelProvider(this).get(MatchViewModel.class);
+        vmMatch = new ViewModelProvider(this).get(MatchViewModel.class);
 
         // UI refresh triggers for serving team and server number changes
-        viewModel.getCurrentServingTeam().observe(this, team -> refreshUICurrentTeam(team));
-        viewModel.getServer().observe(this, server -> refreshUI());
+        vmMatch.getCurrentServingTeam().observe(this, team -> refreshUICurrentTeam(team));
+        vmMatch.getServer().observe(this, server -> refreshUI());
 
         // Score logic triggers
-        viewModel.getBlueScore().observe(this, score -> handleScoreUpdate(true, score));
-        viewModel.getRedScore().observe(this, score -> handleScoreUpdate(false, score));
+        vmMatch.getBlueScore().observe(this, score -> handleScoreUpdate(true, score));
+        vmMatch.getRedScore().observe(this, score -> handleScoreUpdate(false, score));
 
         // Game over observer
-        viewModel.getGameIsOver().observe(this, isGameOver -> {
+        vmMatch.getGameIsOver().observe(this, isGameOver -> {
             if (Boolean.TRUE.equals(isGameOver)) {
                 resetMatchToInitialState();
             }
@@ -105,10 +107,10 @@ public class MainActivity extends AppCompatActivity {
      * Updates the score text view based on who is currently serving.
      */
     private void updateScoreText() {
-        int blue = getVal(viewModel.getBlueScore());
-        int red = getVal(viewModel.getRedScore());
-        int server = viewModel.getServer().getValue().getValue();
-        boolean isBlueServing = viewModel.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
+        int blue = getVal(vmMatch.getBlueScore());
+        int red = getVal(vmMatch.getRedScore());
+        int server = vmMatch.getServer().getValue().getValue();
+        boolean isBlueServing = vmMatch.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
 
         // In Pickleball, the serving team's score is mentioned first
         String formattedScore = isBlueServing
@@ -122,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
      * Updates the text of the fault button to reflect if it will trigger a side-out.
      */
     private void updateButtonLabels() {
-        MatchViewModel.SERVER server = viewModel.getServer().getValue();
+        MatchViewModel.SERVER server = vmMatch.getServer().getValue();
         btnFault.setText(server == MatchViewModel.SERVER.ONE ? "FAULT" : "SIDEOUT");
     }
 
@@ -134,17 +136,24 @@ public class MainActivity extends AppCompatActivity {
         if (isGameOver()) return;
         toggleServingIndicator(isBlueTeam);
         updateScoreText();
-
+        List<MatchCall> calls = vmMatch.getCalls().getValue();
+        MatchCall call = new MatchCall();
+        call.setBlueScore(isBlueTeam ? newScore : vmMatch.getBlueScore().getValue());
+        call.setRedScore(!isBlueTeam ? newScore : vmMatch.getRedScore().getValue());
+        call.setServer(vmMatch.getServer().getValue());
+        call.setCurrentServingTeam(vmMatch.getCurrentServingTeam().getValue());
+        calls.add(call);
+        vmMatch.setCalls(calls);
     }
 
     /**
      * Checks if the current score meets win conditions (at least 11 points and win by 2).
      */
     private void checkForWinner(boolean isBlueTeam, int currentScore) {
-        int oppositeScore = isBlueTeam ? getVal(viewModel.getRedScore()) : getVal(viewModel.getBlueScore());
+        int oppositeScore = isBlueTeam ? getVal(vmMatch.getRedScore()) : getVal(vmMatch.getBlueScore());
         if (currentScore >= 11 && (currentScore - oppositeScore) >= 2) {
-            viewModel.setGameIsOver(true);
-            showWinnerDialog((isBlueTeam ? "Blue" : "Red") + " Team Wins! Final Score: " + currentScore + " - " + oppositeScore + " - " + viewModel.getServer().getValue().getValue());
+            vmMatch.setGameIsOver(true);
+            showWinnerDialog((isBlueTeam ? "Blue" : "Red") + " Team Wins! Final Score: " + currentScore + " - " + oppositeScore + " - " + vmMatch.getServer().getValue().getValue());
         }
     }
 
@@ -169,10 +178,10 @@ public class MainActivity extends AppCompatActivity {
      * Resets the match to the starting state (0-0-2).
      */
     private void resetMatchToInitialState() {
-        viewModel.setCurrentServingTeam(MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
-        viewModel.setServer(MatchViewModel.SERVER.TWO);
-        viewModel.setBlueScore(0);
-        viewModel.setRedScore(0);
+        vmMatch.setCurrentServingTeam(MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
+        vmMatch.setServer(MatchViewModel.SERVER.TWO);
+        vmMatch.setBlueScore(0);
+        vmMatch.setRedScore(0);
 
         txtScore.setText("0-0-2");
 
@@ -196,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
                 .setMessage(message)
                 .setPositiveButton("OK", (d, w) -> {
                     d.dismiss();
-                    viewModel.setGameIsOver(false);
+                    vmMatch.setGameIsOver(false);
                 })
                 .setCancelable(false)
                 .create();
@@ -222,12 +231,12 @@ public class MainActivity extends AppCompatActivity {
      * XML OnClick listener for the Score button.
      */
     public void onBtnScoreListener(View v) {
-        boolean isBlueServing = viewModel.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
+        boolean isBlueServing = vmMatch.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
         if (isBlueServing) {
-            viewModel.setBlueScore(getVal(viewModel.getBlueScore()) + 1);
+            vmMatch.setBlueScore(getVal(vmMatch.getBlueScore()) + 1);
             swapPlayerLabels(binding.txtPlayerBlueTop, binding.txtPlayerBlueBottom);
         } else {
-            viewModel.setRedScore(getVal(viewModel.getRedScore()) + 1);
+            vmMatch.setRedScore(getVal(vmMatch.getRedScore()) + 1);
             swapPlayerLabels(binding.txtPlayerRedTop, binding.txtPlayerRedBottom);
         }
     }
@@ -243,20 +252,20 @@ public class MainActivity extends AppCompatActivity {
      * XML OnClick listener for the Fault button.
      */
     public void onBtnFaultListener(View v) {
-        if (viewModel.getServer().getValue() == MatchViewModel.SERVER.TWO) {
-            viewModel.setServer(MatchViewModel.SERVER.ONE);
-            MatchViewModel.CURRENT_SERVING_TEAM current = viewModel.getCurrentServingTeam().getValue();
-            viewModel.setCurrentServingTeam(current == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE
+        if (vmMatch.getServer().getValue() == MatchViewModel.SERVER.TWO) {
+            vmMatch.setServer(MatchViewModel.SERVER.ONE);
+            MatchViewModel.CURRENT_SERVING_TEAM current = vmMatch.getCurrentServingTeam().getValue();
+            vmMatch.setCurrentServingTeam(current == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE
                     ? MatchViewModel.CURRENT_SERVING_TEAM.TEAM_RED
                     : MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
         } else {
-            toggleServingIndicator(viewModel.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
-            viewModel.setServer(MatchViewModel.SERVER.TWO);
+            toggleServingIndicator(vmMatch.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
+            vmMatch.setServer(MatchViewModel.SERVER.TWO);
         }
     }
 
     private boolean isGameOver() {
-        return Boolean.TRUE.equals(viewModel.getGameIsOver().getValue());
+        return Boolean.TRUE.equals(vmMatch.getGameIsOver().getValue());
     }
 
     private int getVal(LiveData<Integer> liveData) {
@@ -279,5 +288,9 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(bars.left, 0, bars.right, 0);
             return insets;
         });
+    }
+
+    public void onBtnListenerUndo(View view) {
+
     }
 }

@@ -4,6 +4,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MatchViewModel extends ViewModel {
 
     public enum CURRENT_SERVING_TEAM {
@@ -32,6 +35,16 @@ public class MatchViewModel extends ViewModel {
     private SkippableLiveData<Integer> redScore = new SkippableLiveData<>(0);
 
     private SkippableLiveData<Boolean> isGameOver = new SkippableLiveData<>(false);
+
+    private MutableLiveData<List<MatchCall>> calls = new MutableLiveData<>(new ArrayList<>());
+
+    public LiveData<List<MatchCall>> getCalls() {
+        return calls;
+    }
+
+    public void setCalls(List<MatchCall> calls) {
+        this.calls.setValue(calls);
+    }
 
     public LiveData<Boolean> getGameIsOver() {
         return this.isGameOver;
