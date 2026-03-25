@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
         if (isGameOver()) return;
         toggleServingIndicator(isBlueTeam);
         updateScoreText();
-        System.out.println("ss");
+
     }
 
     /**
@@ -144,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         int oppositeScore = isBlueTeam ? getVal(viewModel.getRedScore()) : getVal(viewModel.getBlueScore());
         if (currentScore >= 11 && (currentScore - oppositeScore) >= 2) {
             viewModel.setGameIsOver(true);
-            showWinnerDialog((isBlueTeam ? "Blue" : "Red") + " Team Wins!");
+            showWinnerDialog((isBlueTeam ? "Blue" : "Red") + " Team Wins! Final Score: " + currentScore + " - " + oppositeScore + " - " + viewModel.getServer().getValue().getValue());
         }
     }
 
