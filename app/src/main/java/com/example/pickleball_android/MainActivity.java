@@ -134,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
         if (isGameOver()) return;
         toggleServingIndicator(isBlueTeam);
         updateScoreText();
+        System.out.println("ss");
     }
 
     /**
@@ -232,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void swapPlayerLabels(TextView t1, TextView t2) {
+        if (isGameOver()) return;
         CharSequence temp = t1.getText();
         t1.setText(t2.getText());
         t2.setText(temp);
