@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
             binding.imgServingRedTop.setVisibility(View.INVISIBLE);
             binding.imgServingRedBottom.setVisibility(View.VISIBLE);
         }
-        
+
     }
 
     /**
@@ -130,9 +130,8 @@ public class MainActivity extends AppCompatActivity {
      * Handles logic when a team's score is updated.
      */
     private void handleScoreUpdate(boolean isBlueTeam, int newScore) {
-        if (isGameOver()) return;
-
         checkForWinner(isBlueTeam, newScore);
+        if (isGameOver()) return;
         toggleServingIndicator(isBlueTeam);
         updateScoreText();
     }
