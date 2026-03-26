@@ -13,7 +13,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.pickleball_android.databinding.ActivityMainBinding;
@@ -62,7 +61,9 @@ public class MainActivity extends AppCompatActivity {
         vmMatch = new ViewModelProvider(this).get(MatchViewModel.class);
 
         vmMatch.getCalls().observe(this, calls -> {
-
+            if (vmMatch.getGameIsOver().getValue()) {
+                return;
+            }
             MatchCall currentCall = calls.stream()
                     .reduce((first, second) -> second)
                     .orElse(null);
@@ -86,20 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
         vmMatch.getServer().observe(this, server -> updateButtonLabels());
 
-        vmMatch.getGameIsOver().observe(this, isGameOver -> {
-            if (Boolean.TRUE.equals(isGameOver)) {
-                resetMatchToInitialState();
-            }
-        });
     }
-
-    /**
-     * Refreshes the score display and button labels if the game is not over.
-     */
-
-    /**
-     * Updates the score text view based on who is currently serving.
-     */
 
     private void updateScoreText(MatchCall call) {
         int blue = call.getBlueScore();
@@ -115,40 +103,21 @@ public class MainActivity extends AppCompatActivity {
         txtScore.setText(formattedScore);
     }
 
-    /**
-     * Updates the text of the fault button to reflect if it will trigger a side-out.
-     */
     private void updateButtonLabels() {
         MatchViewModel.SERVER server = vmMatch.getServer().getValue();
         btnFault.setText(server == MatchViewModel.SERVER.ONE ? "FAULT" : "SIDEOUT");
     }
 
-    /**
-     * Handles logic when a team's score is updated.
-     */
-
-    /**
-     * Checks if the current score meets win conditions (at least 11 points and win by 2).
-     */
     private void checkForWinner(boolean isBlueTeam, MatchCall call) {
-
-//        int oppositeScore = isBlueTeam ? call.getRedScore() : call.getBlueScore();
-//        if (currentScore >= 11 && (currentScore - oppositeScore) >= 2) {
-//            vmMatch.setGameIsOver(true);
-//            showWinnerDialog((isBlueTeam ? "Blue" : "Red") + " Team Wins! Final Score: " + currentScore + " - " + oppositeScore + " - " + vmMatch.getServer().getValue().getValue());
-//        }
 
         int oppositeScore = isBlueTeam ? call.getRedScore() : call.getBlueScore();
         int currentScore = isBlueTeam ? call.getBlueScore() : call.getRedScore();
-        if (oppositeScore >= 11 && (currentScore - oppositeScore) >= 2) {
+        if (currentScore >= 11 && (currentScore - oppositeScore) >= 2) {
             vmMatch.setGameIsOver(true);
             showWinnerDialog((isBlueTeam ? "Blue" : "Red") + " Team Wins! Final Score: " + currentScore + " - " + oppositeScore + " - " + vmMatch.getServer().getValue().getValue());
         }
     }
 
-    /**
-     * Toggles the serving indicator (paddle image) between the two players on a team.
-     */
     private void toggleServingIndicator(boolean isBlueTeam) {
         if (isBlueTeam) {
             rotateVisibility(binding.imgServingBlueTop, binding.imgServingBlueBottom);
@@ -167,14 +136,17 @@ public class MainActivity extends AppCompatActivity {
         v2.setVisibility(isV1Visible ? View.VISIBLE : View.INVISIBLE);
     }
 
-    /**
-     * Resets the match to the starting state (0-0-2).
-     */
     private void resetMatchToInitialState() {
         vmMatch.setCurrentServingTeam(MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
         vmMatch.setServer(MatchViewModel.SERVER.TWO);
         vmMatch.setBlueScore(0);
         vmMatch.setRedScore(0);
+        vmMatch.setAtSideOut(false);
+
+        if (vmMatch.getGameIsOver().getValue()) {
+            vmMatch.setCalls(vmMatch.getInitCalls());
+            vmMatch.setGameIsOver(false);
+        }
 
         txtScore.setText("0-0-2");
 
@@ -187,42 +159,10 @@ public class MainActivity extends AppCompatActivity {
         binding.txtPlayerBlueBottom.setText("Player 2");
         binding.txtPlayerRedTop.setText("Player 3");
         binding.txtPlayerRedBottom.setText("Player 4");
+
+        System.out.println("reset");
     }
 
-    /**
-     * Displays an AlertDialog when a team wins.
-     */
-    private void showWinnerDialog(String message) {
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setTitle("Game Over")
-                .setMessage(message)
-                .setPositiveButton("OK", (d, w) -> {
-                    d.dismiss();
-                    vmMatch.setGameIsOver(false);
-                })
-                .setCancelable(false)
-                .create();
-
-        dialog.show();
-        applyFullScreenFlags(dialog);
-    }
-
-    /**
-     * Ensures the dialog doesn't bring back the navigation bar.
-     */
-    private void applyFullScreenFlags(@NonNull AlertDialog dialog) {
-        if (dialog.getWindow() != null) {
-            WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(dialog.getWindow().getDecorView());
-            if (controller != null) {
-                controller.hide(WindowInsetsCompat.Type.systemBars());
-                controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-            }
-        }
-    }
-
-    /**
-     * XML OnClick listener for the Score button.
-     */
     public void onBtnScoreListener(View v) {
         List<MatchCall> calls = new ArrayList<>(vmMatch.getCalls().getValue());
         MatchCall call = vmMatch.getMatchCallInatance();
@@ -240,7 +180,7 @@ public class MainActivity extends AppCompatActivity {
         call.setCurrentServingTeam(vmMatch.getCurrentServingTeam().getValue());
         calls.add(call);
 
-        System.out.println(call.textPrint(call));
+        System.out.println("size:" + calls.size());
         vmMatch.setCalls(calls);
 //        for (MatchCall c : calls) {
 //            System.out.println(c.textPrint(c));
@@ -248,7 +188,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void swapPlayerLabels(TextView t1, TextView t2) {
-        if (isGameOver()) return;
         CharSequence temp = t1.getText();
         t1.setText(t2.getText());
         t2.setText(temp);
@@ -281,15 +220,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private boolean isGameOver() {
-        return Boolean.TRUE.equals(vmMatch.getGameIsOver().getValue());
-    }
-
-    private int getVal(LiveData<Integer> liveData) {
-        Integer value = liveData.getValue();
-        return value != null ? value : 0;
-    }
-
     /**
      * Enables EdgeToEdge and hides system bars.
      */
@@ -309,5 +239,30 @@ public class MainActivity extends AppCompatActivity {
 
     public void onBtnListenerUndo(View view) {
 
+    }
+
+    private void showWinnerDialog(String message) {
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Game Over")
+                .setMessage(message)
+                .setPositiveButton("OK", (d, w) -> {
+                    resetMatchToInitialState();
+                    d.dismiss();
+                })
+                .setCancelable(false)
+                .create();
+
+        dialog.show();
+        applyFullScreenFlags(dialog);
+    }
+
+    private void applyFullScreenFlags(@NonNull AlertDialog dialog) {
+        if (dialog.getWindow() != null) {
+            WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(dialog.getWindow().getDecorView());
+            if (controller != null) {
+                controller.hide(WindowInsetsCompat.Type.systemBars());
+                controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+            }
+        }
     }
 }
