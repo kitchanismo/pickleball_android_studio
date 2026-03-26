@@ -36,7 +36,23 @@ public class MatchViewModel extends ViewModel {
 
     private SkippableLiveData<Boolean> isGameOver = new SkippableLiveData<>(false);
 
-    private MutableLiveData<List<MatchCall>> calls = new MutableLiveData<>(new ArrayList<>());
+    private MutableLiveData<List<MatchCall>> calls = new MutableLiveData<>(new ArrayList<MatchCall>(List.of(new MatchCall(CURRENT_SERVING_TEAM.TEAM_BLUE, SERVER.TWO, 0, 0, false))));
+
+    private MutableLiveData<Boolean> atSideOut = new MutableLiveData<>(false);
+
+    public MatchViewModel() {
+//        List<MatchCall> calls = new ArrayList<>(this.calls.getValue());
+//        this.calls.getValue().add(new MatchCall(CURRENT_SERVING_TEAM.TEAM_BLUE, SERVER.TWO, 0, 0));
+//        this.setCalls(calls);
+    }
+
+    public LiveData<Boolean> getAtSideOut() {
+        return atSideOut;
+    }
+
+    public void setAtSideOut(Boolean atSideOut) {
+        this.atSideOut.setValue(atSideOut);
+    }
 
     public LiveData<List<MatchCall>> getCalls() {
         return calls;
@@ -84,6 +100,10 @@ public class MatchViewModel extends ViewModel {
 
     public void setRedScore(int redScore) {
         this.redScore.setValue(redScore);
+    }
+
+    public MatchCall getMatchCallInatance() {
+        return new MatchCall(currentServingTeam.getValue(), server.getValue(), blueScore.getValue(), redScore.getValue(), atSideOut.getValue());
     }
 
 

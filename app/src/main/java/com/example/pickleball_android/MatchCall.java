@@ -6,15 +6,14 @@ public class MatchCall {
     private Integer blueScore;
     private Integer redScore;
 
-    public MatchCall(MatchViewModel.CURRENT_SERVING_TEAM currentServingTeam, MatchViewModel.SERVER server, Integer blueScore, Integer redScore) {
+    private Boolean atSideOut = false;
+
+    public MatchCall(MatchViewModel.CURRENT_SERVING_TEAM currentServingTeam, MatchViewModel.SERVER server, Integer blueScore, Integer redScore, Boolean atSideOut) {
         this.currentServingTeam = currentServingTeam;
         this.server = server;
         this.blueScore = blueScore;
         this.redScore = redScore;
-    }
-
-    public MatchCall() {
-
+        this.atSideOut = atSideOut;
     }
 
     public MatchViewModel.CURRENT_SERVING_TEAM getCurrentServingTeam() {
@@ -47,6 +46,14 @@ public class MatchCall {
 
     public void setRedScore(Integer redScore) {
         this.redScore = redScore;
+    }
+
+    public Boolean getAtSideOut() {
+        return atSideOut;
+    }
+
+    public void setAtSideOut(Boolean atSideOut) {
+        this.atSideOut = atSideOut;
     }
 
     public String textPrint(MatchCall call) {
