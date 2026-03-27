@@ -141,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
         vmMatch.setServer(MatchViewModel.SERVER.TWO);
         vmMatch.setBlueScore(0);
         vmMatch.setRedScore(0);
-        vmMatch.setAtSideOut(false);
 
         if (vmMatch.getGameIsOver().getValue()) {
             vmMatch.setCalls(vmMatch.getInitCalls());
@@ -210,7 +209,6 @@ public class MainActivity extends AppCompatActivity {
             // toggleServingIndicator(vmMatch.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
             vmMatch.setServer(MatchViewModel.SERVER.TWO);
         }
-        call.setAtSideOut(true);
         call.setBlueScore(vmMatch.getBlueScore().getValue());
         call.setRedScore(vmMatch.getRedScore().getValue());
         call.setServer(vmMatch.getServer().getValue());
