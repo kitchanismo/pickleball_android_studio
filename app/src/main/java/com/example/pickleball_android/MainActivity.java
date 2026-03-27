@@ -76,13 +76,17 @@ public class MainActivity extends AppCompatActivity {
 
             updateButtonLabels(lastCall.getServer());
 
-            updatePlayerName(lastCall.getPlayerName());
-
             if (count < 2) {
                 resetMatchToInitialState();
                 System.out.println("hit");
                 return;
             }
+
+            // if (!lastCall.getIsAtFaultOrSideOut()) {
+            updatePlayerName(lastCall.getPlayerName());
+            //}
+
+            System.out.println("observer:" + count);
             updateScoreText(lastCall);
             moveBallPosition(lastCall.getBallPosition());
         });
@@ -156,14 +160,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void onBtnScoreListener(View v) {
         List<MatchCall> calls = new ArrayList<>(vmMatch.getCalls().getValue());
-        MatchCall call = vmMatch.getCall().getValue();
+        MatchCall call = vmMatch.getLastCallInstance();
+
         boolean isBlueServing = call.getCurrentServingTeam() == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
 
-        PlayerName playerName = call.getPlayerName();
+        PlayerName playerName = vmMatch.getPlayerNameInstance(call.getPlayerName());
 
         if (isBlueServing) {
             call.setBlueScore(call.getBlueScore() + 1);
-
             call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.BLUE_TOP
                     ? MatchCall.BALL_POSITION.BLUE_BOTTOM : MatchCall.BALL_POSITION.BLUE_TOP);
 
@@ -179,8 +183,13 @@ public class MainActivity extends AppCompatActivity {
             call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.RED_TOP ? MatchCall.BALL_POSITION.RED_BOTTOM : MatchCall.BALL_POSITION.RED_TOP);
         }
         call.setPlayerName(playerName);
+        call.setIsAtFaultOrSideOut(false);
+
         calls.add(call);
         vmMatch.setCalls(calls);
+        for (MatchCall c : calls) {
+            System.out.println(c.textPrint(c));
+        }
     }
 
     /**
@@ -188,7 +197,8 @@ public class MainActivity extends AppCompatActivity {
      */
     public void onBtnFaultListener(View v) {
         List<MatchCall> calls = vmMatch.getCalls().getValue();
-        MatchCall call = vmMatch.getCall().getValue();
+        MatchCall call = vmMatch.getLastCallInstance();
+
         MatchCall.CURRENT_SERVING_TEAM current = call.getCurrentServingTeam();
         Boolean isBlueServing = current == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
         if (call.getServer() == MatchCall.SERVER.TWO) {
@@ -206,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
                 call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.RED_TOP ? MatchCall.BALL_POSITION.RED_BOTTOM : MatchCall.BALL_POSITION.RED_TOP);
             }
         }
-
+        call.setIsAtFaultOrSideOut(true);
         calls.add(call);
         vmMatch.setCalls(calls);
 
@@ -230,6 +240,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onBtnListenerUndo(View view) {
+        vmMatch.undoCall();
 
     }
 

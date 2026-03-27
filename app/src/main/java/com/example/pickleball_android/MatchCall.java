@@ -53,13 +53,24 @@ public class MatchCall {
 
     private PlayerName playerName;
 
-    public MatchCall(CURRENT_SERVING_TEAM currentServingTeam, SERVER server, Integer blueScore, Integer redScore, BALL_POSITION ballPosition, PlayerName playerName) {
+    private Boolean isAtFaultOrSideOut;
+
+    public MatchCall(CURRENT_SERVING_TEAM currentServingTeam, SERVER server, Integer blueScore, Integer redScore, BALL_POSITION ballPosition, PlayerName playerName, Boolean isAtFaultOrSideOut) {
         this.currentServingTeam = currentServingTeam;
         this.server = server;
         this.blueScore = blueScore;
         this.redScore = redScore;
         this.ballPosition = ballPosition;
         this.playerName = playerName;
+        this.isAtFaultOrSideOut = isAtFaultOrSideOut;
+    }
+
+    public Boolean getIsAtFaultOrSideOut() {
+        return isAtFaultOrSideOut;
+    }
+
+    public void setIsAtFaultOrSideOut(Boolean isAtFaultOrSideOut) {
+        this.isAtFaultOrSideOut = isAtFaultOrSideOut;
     }
 
     public PlayerName getPlayerName() {
@@ -111,6 +122,6 @@ public class MatchCall {
     }
 
     public String textPrint(MatchCall call) {
-        return "Current Serving Team: " + call.currentServingTeam + ", Server: " + call.server + ", Blue Score: " + call.blueScore + ", Red Score: " + call.redScore + "";
+        return "PlayerNameBlueTop(:" + call.playerName.getBlueTop() + ",Current Serving Team: " + call.currentServingTeam + ", Server: " + call.server + ", Blue Score: " + call.blueScore + ", Red Score: " + call.redScore + "";
     }
 }
