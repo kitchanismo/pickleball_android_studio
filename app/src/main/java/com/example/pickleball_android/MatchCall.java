@@ -22,16 +22,33 @@ public class MatchCall {
         }
     }
 
+    public enum BALL_POSITION {
+        BLUE_TOP,
+        BLUE_BOTTOM,
+        RED_TOP,
+        RED_BOTTOM
+    }
+
     private CURRENT_SERVING_TEAM currentServingTeam;
     private SERVER server;
     private Integer blueScore;
     private Integer redScore;
+    private BALL_POSITION ballPosition;
 
-    public MatchCall(CURRENT_SERVING_TEAM currentServingTeam, SERVER server, Integer blueScore, Integer redScore) {
+    public MatchCall(CURRENT_SERVING_TEAM currentServingTeam, SERVER server, Integer blueScore, Integer redScore, BALL_POSITION ballPosition) {
         this.currentServingTeam = currentServingTeam;
         this.server = server;
         this.blueScore = blueScore;
         this.redScore = redScore;
+        this.ballPosition = ballPosition;
+    }
+
+    public BALL_POSITION getBallPosition() {
+        return ballPosition;
+    }
+
+    public void setBallPosition(BALL_POSITION ballPosition) {
+        this.ballPosition = ballPosition;
     }
 
     public CURRENT_SERVING_TEAM getCurrentServingTeam() {
