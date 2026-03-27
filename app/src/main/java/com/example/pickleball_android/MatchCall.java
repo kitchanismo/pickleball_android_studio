@@ -1,23 +1,44 @@
 package com.example.pickleball_android;
 
 public class MatchCall {
-    private MatchViewModel.CURRENT_SERVING_TEAM currentServingTeam;
-    private MatchViewModel.SERVER server;
+
+    public enum CURRENT_SERVING_TEAM {
+        TEAM_BLUE,
+        TEAM_RED
+    }
+
+    public enum SERVER {
+        ONE(1),
+        TWO(2);
+
+        private final int value;
+
+        SERVER(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
+
+    private CURRENT_SERVING_TEAM currentServingTeam;
+    private SERVER server;
     private Integer blueScore;
     private Integer redScore;
 
-    public MatchCall(MatchViewModel.CURRENT_SERVING_TEAM currentServingTeam, MatchViewModel.SERVER server, Integer blueScore, Integer redScore) {
+    public MatchCall(CURRENT_SERVING_TEAM currentServingTeam, SERVER server, Integer blueScore, Integer redScore) {
         this.currentServingTeam = currentServingTeam;
         this.server = server;
         this.blueScore = blueScore;
         this.redScore = redScore;
     }
 
-    public MatchViewModel.CURRENT_SERVING_TEAM getCurrentServingTeam() {
+    public CURRENT_SERVING_TEAM getCurrentServingTeam() {
         return currentServingTeam;
     }
 
-    public MatchViewModel.SERVER getServer() {
+    public SERVER getServer() {
         return server;
     }
 
@@ -29,11 +50,11 @@ public class MatchCall {
         return redScore;
     }
 
-    public void setCurrentServingTeam(MatchViewModel.CURRENT_SERVING_TEAM currentServingTeam) {
+    public void setCurrentServingTeam(CURRENT_SERVING_TEAM currentServingTeam) {
         this.currentServingTeam = currentServingTeam;
     }
 
-    public void setServer(MatchViewModel.SERVER server) {
+    public void setServer(SERVER server) {
         this.server = server;
     }
 

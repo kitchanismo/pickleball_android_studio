@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (lastCall == null) return;
 
-            Boolean isBlueTeam = lastCall.getCurrentServingTeam() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
+            Boolean isBlueTeam = lastCall.getCurrentServingTeam() == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
 
             checkForWinner(isBlueTeam, lastCall);
 
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         int blue = call.getBlueScore();
         int red = call.getRedScore();
         int server = call.getServer().getValue();
-        boolean isBlueServing = call.getCurrentServingTeam() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
+        boolean isBlueServing = call.getCurrentServingTeam() == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
 
         // In Pickleball, the serving team's score is mentioned first
         String formattedScore = isBlueServing
@@ -103,8 +103,8 @@ public class MainActivity extends AppCompatActivity {
         txtScore.setText(formattedScore);
     }
 
-    private void updateButtonLabels(MatchViewModel.SERVER server) {
-        btnFault.setText(server == MatchViewModel.SERVER.ONE ? "FAULT" : "SIDEOUT");
+    private void updateButtonLabels(MatchCall.SERVER server) {
+        btnFault.setText(server == MatchCall.SERVER.ONE ? "FAULT" : "SIDEOUT");
     }
 
     private void checkForWinner(boolean isBlueTeam, MatchCall call) {
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
     public void onBtnScoreListener(View v) {
         List<MatchCall> calls = new ArrayList<>(vmMatch.getCalls().getValue());
         MatchCall call = vmMatch.getCall().getValue();
-        boolean isBlueServing = call.getCurrentServingTeam() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
+        boolean isBlueServing = call.getCurrentServingTeam() == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
         if (isBlueServing) {
             call.setBlueScore(call.getBlueScore() + 1);
             swapPlayerLabels(binding.txtPlayerBlueTop, binding.txtPlayerBlueBottom);
@@ -185,15 +185,15 @@ public class MainActivity extends AppCompatActivity {
     public void onBtnFaultListener(View v) {
         List<MatchCall> calls = vmMatch.getCalls().getValue();
         MatchCall call = vmMatch.getCall().getValue();
-        if (call.getServer() == MatchViewModel.SERVER.TWO) {
-            call.setServer(MatchViewModel.SERVER.ONE);
-            MatchViewModel.CURRENT_SERVING_TEAM current = call.getCurrentServingTeam();
-            call.setCurrentServingTeam(current == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE
-                    ? MatchViewModel.CURRENT_SERVING_TEAM.TEAM_RED
-                    : MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
+        if (call.getServer() == MatchCall.SERVER.TWO) {
+            call.setServer(MatchCall.SERVER.ONE);
+            MatchCall.CURRENT_SERVING_TEAM current = call.getCurrentServingTeam();
+            call.setCurrentServingTeam(current == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE
+                    ? MatchCall.CURRENT_SERVING_TEAM.TEAM_RED
+                    : MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE);
 
         } else {
-            call.setServer(MatchViewModel.SERVER.TWO);
+            call.setServer(MatchCall.SERVER.TWO);
         }
         calls.add(call);
         vmMatch.setCalls(calls);

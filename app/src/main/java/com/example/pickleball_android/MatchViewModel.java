@@ -9,34 +9,9 @@ import java.util.List;
 
 public class MatchViewModel extends ViewModel {
 
-    public enum CURRENT_SERVING_TEAM {
-        TEAM_BLUE,
-        TEAM_RED
-    }
-
-    public enum SERVER {
-        ONE(1),
-        TWO(2);
-
-        private final int value;
-
-        SERVER(int value) {
-            this.value = value;
-        }
-
-        public int getValue() {
-            return value;
-        }
-    }
-
-//    private SkippableLiveData<CURRENT_SERVING_TEAM> currentServingTeam = new SkippableLiveData<>(CURRENT_SERVING_TEAM.TEAM_BLUE);
-//    private MutableLiveData<SERVER> server = new MutableLiveData<>(SERVER.TWO);
-//    private SkippableLiveData<Integer> blueScore = new SkippableLiveData<>(0);
-//    private SkippableLiveData<Integer> redScore = new SkippableLiveData<>(0);
-
     private SkippableLiveData<Boolean> isGameOver = new SkippableLiveData<>(false);
 
-    private MutableLiveData<MatchCall> call = new MutableLiveData<>(new MatchCall(CURRENT_SERVING_TEAM.TEAM_BLUE, SERVER.TWO, 0, 0));
+    private MutableLiveData<MatchCall> call = new MutableLiveData<>(new MatchCall(MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE, MatchCall.SERVER.TWO, 0, 0));
 
     private List<MatchCall> initCalls = new ArrayList<MatchCall>(List.of(call.getValue()));
 
@@ -67,7 +42,7 @@ public class MatchViewModel extends ViewModel {
     }
 
     public void setMatchCallToInitialState() {
-        this.call.setValue(new MatchCall(CURRENT_SERVING_TEAM.TEAM_BLUE, SERVER.TWO, 0, 0));
+        this.call.setValue(new MatchCall(MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE, MatchCall.SERVER.TWO, 0, 0));
     }
 
     public MatchCall getLastCall() {
