@@ -64,28 +64,28 @@ public class MainActivity extends AppCompatActivity {
             if (vmMatch.getGameIsOver().getValue()) {
                 return;
             }
-            MatchCall currentCall = calls.stream()
-                    .reduce((first, second) -> second)
-                    .orElse(null);
+            MatchCall lastCall = vmMatch.getLastCall();
+
             int count = calls.size();
 
-            if (currentCall == null) return;
+            if (lastCall == null) return;
 
-            Boolean isBlueTeam = currentCall.getCurrentServingTeam() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
+            Boolean isBlueTeam = lastCall.getCurrentServingTeam() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
 
-            checkForWinner(isBlueTeam, currentCall);
+            checkForWinner(isBlueTeam, lastCall);
+
+            updateButtonLabels(lastCall.getServer());
 
             if (count < 2) {
                 resetMatchToInitialState();
                 System.out.println("hit");
                 return;
             }
-            updateScoreText(currentCall);
+            updateScoreText(lastCall);
             toggleServingIndicator(isBlueTeam);
 
         });
 
-        vmMatch.getServer().observe(this, server -> updateButtonLabels());
 
     }
 
@@ -103,8 +103,7 @@ public class MainActivity extends AppCompatActivity {
         txtScore.setText(formattedScore);
     }
 
-    private void updateButtonLabels() {
-        MatchViewModel.SERVER server = vmMatch.getServer().getValue();
+    private void updateButtonLabels(MatchViewModel.SERVER server) {
         btnFault.setText(server == MatchViewModel.SERVER.ONE ? "FAULT" : "SIDEOUT");
     }
 
@@ -114,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
         int currentScore = isBlueTeam ? call.getBlueScore() : call.getRedScore();
         if (currentScore >= 11 && (currentScore - oppositeScore) >= 2) {
             vmMatch.setGameIsOver(true);
-            showWinnerDialog((isBlueTeam ? "Blue" : "Red") + " Team Wins! Final Score: " + currentScore + " - " + oppositeScore + " - " + vmMatch.getServer().getValue().getValue());
+            showWinnerDialog((isBlueTeam ? "Blue" : "Red") + " Team Wins! Final Score: " + currentScore + " - " + oppositeScore + " - " + call.getServer().getValue());
         }
     }
 
@@ -137,10 +136,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void resetMatchToInitialState() {
-        vmMatch.setCurrentServingTeam(MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
-        vmMatch.setServer(MatchViewModel.SERVER.TWO);
-        vmMatch.setBlueScore(0);
-        vmMatch.setRedScore(0);
+        vmMatch.setMatchCallToInitialState();
 
         if (vmMatch.getGameIsOver().getValue()) {
             vmMatch.setCalls(vmMatch.getInitCalls());
@@ -164,26 +160,17 @@ public class MainActivity extends AppCompatActivity {
 
     public void onBtnScoreListener(View v) {
         List<MatchCall> calls = new ArrayList<>(vmMatch.getCalls().getValue());
-        MatchCall call = vmMatch.getMatchCallInatance();
-        boolean isBlueServing = vmMatch.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
+        MatchCall call = vmMatch.getCall().getValue();
+        boolean isBlueServing = call.getCurrentServingTeam() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
         if (isBlueServing) {
-            vmMatch.setBlueScore(vmMatch.getBlueScore().getValue() + 1);
+            call.setBlueScore(call.getBlueScore() + 1);
             swapPlayerLabels(binding.txtPlayerBlueTop, binding.txtPlayerBlueBottom);
         } else {
-            vmMatch.setRedScore(vmMatch.getRedScore().getValue() + 1);
+            call.setRedScore(call.getRedScore() + 1);
             swapPlayerLabels(binding.txtPlayerRedTop, binding.txtPlayerRedBottom);
         }
-        call.setBlueScore(vmMatch.getBlueScore().getValue());
-        call.setRedScore(vmMatch.getRedScore().getValue());
-        call.setServer(vmMatch.getServer().getValue());
-        call.setCurrentServingTeam(vmMatch.getCurrentServingTeam().getValue());
         calls.add(call);
-
-        System.out.println("size:" + calls.size());
         vmMatch.setCalls(calls);
-//        for (MatchCall c : calls) {
-//            System.out.println(c.textPrint(c));
-//        }
     }
 
     private void swapPlayerLabels(TextView t1, TextView t2) {
@@ -197,22 +184,17 @@ public class MainActivity extends AppCompatActivity {
      */
     public void onBtnFaultListener(View v) {
         List<MatchCall> calls = vmMatch.getCalls().getValue();
-        MatchCall call = vmMatch.getMatchCallInatance();
-        if (vmMatch.getServer().getValue() == MatchViewModel.SERVER.TWO) {
-            vmMatch.setServer(MatchViewModel.SERVER.ONE);
-            MatchViewModel.CURRENT_SERVING_TEAM current = vmMatch.getCurrentServingTeam().getValue();
-            vmMatch.setCurrentServingTeam(current == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE
+        MatchCall call = vmMatch.getCall().getValue();
+        if (call.getServer() == MatchViewModel.SERVER.TWO) {
+            call.setServer(MatchViewModel.SERVER.ONE);
+            MatchViewModel.CURRENT_SERVING_TEAM current = call.getCurrentServingTeam();
+            call.setCurrentServingTeam(current == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE
                     ? MatchViewModel.CURRENT_SERVING_TEAM.TEAM_RED
                     : MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
 
         } else {
-            // toggleServingIndicator(vmMatch.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
-            vmMatch.setServer(MatchViewModel.SERVER.TWO);
+            call.setServer(MatchViewModel.SERVER.TWO);
         }
-        call.setBlueScore(vmMatch.getBlueScore().getValue());
-        call.setRedScore(vmMatch.getRedScore().getValue());
-        call.setServer(vmMatch.getServer().getValue());
-        call.setCurrentServingTeam(vmMatch.getCurrentServingTeam().getValue());
         calls.add(call);
         vmMatch.setCalls(calls);
 

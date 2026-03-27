@@ -29,19 +29,21 @@ public class MatchViewModel extends ViewModel {
         }
     }
 
-    private SkippableLiveData<CURRENT_SERVING_TEAM> currentServingTeam = new SkippableLiveData<>(CURRENT_SERVING_TEAM.TEAM_BLUE);
-    private MutableLiveData<SERVER> server = new MutableLiveData<>(SERVER.TWO);
-    private SkippableLiveData<Integer> blueScore = new SkippableLiveData<>(0);
-    private SkippableLiveData<Integer> redScore = new SkippableLiveData<>(0);
+//    private SkippableLiveData<CURRENT_SERVING_TEAM> currentServingTeam = new SkippableLiveData<>(CURRENT_SERVING_TEAM.TEAM_BLUE);
+//    private MutableLiveData<SERVER> server = new MutableLiveData<>(SERVER.TWO);
+//    private SkippableLiveData<Integer> blueScore = new SkippableLiveData<>(0);
+//    private SkippableLiveData<Integer> redScore = new SkippableLiveData<>(0);
 
     private SkippableLiveData<Boolean> isGameOver = new SkippableLiveData<>(false);
 
-    private List<MatchCall> initCalls = new ArrayList<MatchCall>(List.of(new MatchCall(CURRENT_SERVING_TEAM.TEAM_BLUE, SERVER.TWO, 0, 0)));
+    private MutableLiveData<MatchCall> call = new MutableLiveData<>(new MatchCall(CURRENT_SERVING_TEAM.TEAM_BLUE, SERVER.TWO, 0, 0));
+
+    private List<MatchCall> initCalls = new ArrayList<MatchCall>(List.of(call.getValue()));
 
     private MutableLiveData<List<MatchCall>> calls = new MutableLiveData<>(initCalls);
 
-    public MatchViewModel() {
-
+    public LiveData<MatchCall> getCall() {
+        return call;
     }
 
     public List<MatchCall> getInitCalls() {
@@ -64,42 +66,13 @@ public class MatchViewModel extends ViewModel {
         this.isGameOver.setValue(isGameOver);
     }
 
-    public LiveData<CURRENT_SERVING_TEAM> getCurrentServingTeam() {
-        return this.currentServingTeam;
+    public void setMatchCallToInitialState() {
+        this.call.setValue(new MatchCall(CURRENT_SERVING_TEAM.TEAM_BLUE, SERVER.TWO, 0, 0));
     }
 
-    public void setCurrentServingTeam(CURRENT_SERVING_TEAM currentServingTeam) {
-        this.currentServingTeam.setValue(currentServingTeam);
+    public MatchCall getLastCall() {
+        return this.calls.getValue().stream()
+                .reduce((first, second) -> second)
+                .orElse(null);
     }
-
-    public LiveData<SERVER> getServer() {
-        return this.server;
-    }
-
-    public void setServer(SERVER server) {
-        this.server.setValue(server);
-    }
-
-    public LiveData<Integer> getBlueScore() {
-        return this.blueScore;
-    }
-
-    public void setBlueScore(int blueScore) {
-        this.blueScore.setValue(blueScore);
-    }
-
-    public LiveData<Integer> getRedScore() {
-        return this.redScore;
-    }
-
-    public void setRedScore(int redScore) {
-        this.redScore.setValue(redScore);
-    }
-
-    public MatchCall getMatchCallInatance() {
-        return new MatchCall(currentServingTeam.getValue(), server.getValue(), blueScore.getValue(), redScore.getValue());
-    }
-
-
 }
-
