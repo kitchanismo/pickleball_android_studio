@@ -164,7 +164,6 @@ public class MainActivity extends AppCompatActivity {
         if (isBlueServing) {
             call.setBlueScore(call.getBlueScore() + 1);
 
-            swapPlayerLabels(binding.txtPlayerBlueTop, binding.txtPlayerBlueBottom);
             call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.BLUE_TOP
                     ? MatchCall.BALL_POSITION.BLUE_BOTTOM : MatchCall.BALL_POSITION.BLUE_TOP);
 
@@ -177,18 +176,11 @@ public class MainActivity extends AppCompatActivity {
             playerName.setRedTop(playerName.getRedBottom());
             playerName.setRedBottom(temp);
 
-            swapPlayerLabels(binding.txtPlayerRedTop, binding.txtPlayerRedBottom);
             call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.RED_TOP ? MatchCall.BALL_POSITION.RED_BOTTOM : MatchCall.BALL_POSITION.RED_TOP);
         }
         call.setPlayerName(playerName);
         calls.add(call);
         vmMatch.setCalls(calls);
-    }
-
-    private void swapPlayerLabels(TextView t1, TextView t2) {
-        CharSequence temp = t1.getText();
-        t1.setText(t2.getText());
-        t2.setText(temp);
     }
 
     /**
