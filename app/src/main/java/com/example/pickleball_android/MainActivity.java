@@ -82,11 +82,17 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             updateScoreText(lastCall);
-            toggleServingIndicator(isBlueTeam);
-
+            // toggleServingIndicator(isBlueTeam);
+            moveBallPosition(lastCall.getBallPosition());
         });
 
+    }
 
+    public void moveBallPosition(MatchCall.BALL_POSITION ballPosition) {
+        binding.imgServingBlueTop.setVisibility(ballPosition == MatchCall.BALL_POSITION.BLUE_TOP ? View.VISIBLE : View.INVISIBLE);
+        binding.imgServingBlueBottom.setVisibility(ballPosition == MatchCall.BALL_POSITION.BLUE_BOTTOM ? View.VISIBLE : View.INVISIBLE);
+        binding.imgServingRedTop.setVisibility(ballPosition == MatchCall.BALL_POSITION.RED_TOP ? View.VISIBLE : View.INVISIBLE);
+        binding.imgServingRedBottom.setVisibility(ballPosition == MatchCall.BALL_POSITION.RED_BOTTOM ? View.VISIBLE : View.INVISIBLE);
     }
 
     private void updateScoreText(MatchCall call) {
@@ -165,9 +171,12 @@ public class MainActivity extends AppCompatActivity {
         if (isBlueServing) {
             call.setBlueScore(call.getBlueScore() + 1);
             swapPlayerLabels(binding.txtPlayerBlueTop, binding.txtPlayerBlueBottom);
+            call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.BLUE_TOP
+                    ? MatchCall.BALL_POSITION.BLUE_BOTTOM : MatchCall.BALL_POSITION.BLUE_TOP);
         } else {
             call.setRedScore(call.getRedScore() + 1);
             swapPlayerLabels(binding.txtPlayerRedTop, binding.txtPlayerRedBottom);
+            call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.RED_TOP ? MatchCall.BALL_POSITION.RED_BOTTOM : MatchCall.BALL_POSITION.RED_TOP);
         }
         calls.add(call);
         vmMatch.setCalls(calls);
@@ -185,15 +194,21 @@ public class MainActivity extends AppCompatActivity {
     public void onBtnFaultListener(View v) {
         List<MatchCall> calls = vmMatch.getCalls().getValue();
         MatchCall call = vmMatch.getCall().getValue();
+        MatchCall.CURRENT_SERVING_TEAM current = call.getCurrentServingTeam();
+        Boolean isBlueServing = current == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
         if (call.getServer() == MatchCall.SERVER.TWO) {
             call.setServer(MatchCall.SERVER.ONE);
-            MatchCall.CURRENT_SERVING_TEAM current = call.getCurrentServingTeam();
-            call.setCurrentServingTeam(current == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE
+            call.setCurrentServingTeam(isBlueServing
                     ? MatchCall.CURRENT_SERVING_TEAM.TEAM_RED
                     : MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE);
-
+            call.setBallPosition(isBlueServing ? MatchCall.BALL_POSITION.RED_BOTTOM : MatchCall.BALL_POSITION.BLUE_TOP);
         } else {
             call.setServer(MatchCall.SERVER.TWO);
+            if (isBlueServing) {
+                call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.BLUE_TOP ? MatchCall.BALL_POSITION.BLUE_BOTTOM : MatchCall.BALL_POSITION.BLUE_TOP);
+            } else {
+                call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.RED_TOP ? MatchCall.BALL_POSITION.RED_BOTTOM : MatchCall.BALL_POSITION.RED_TOP);
+            }
         }
         calls.add(call);
         vmMatch.setCalls(calls);
