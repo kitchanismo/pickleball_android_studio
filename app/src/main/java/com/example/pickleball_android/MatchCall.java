@@ -29,18 +29,45 @@ public class MatchCall {
         RED_BOTTOM
     }
 
+    public enum PLAYER_NAME {
+        PLAYER_1("Player 1"),
+        PLAYER_2("Player 2"),
+        PLAYER_3("Player 3"),
+        PLAYER_4("Player 4");
+        private final String value;
+
+        PLAYER_NAME(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
     private CURRENT_SERVING_TEAM currentServingTeam;
     private SERVER server;
     private Integer blueScore;
     private Integer redScore;
     private BALL_POSITION ballPosition;
 
-    public MatchCall(CURRENT_SERVING_TEAM currentServingTeam, SERVER server, Integer blueScore, Integer redScore, BALL_POSITION ballPosition) {
+    private PlayerName playerName;
+
+    public MatchCall(CURRENT_SERVING_TEAM currentServingTeam, SERVER server, Integer blueScore, Integer redScore, BALL_POSITION ballPosition, PlayerName playerName) {
         this.currentServingTeam = currentServingTeam;
         this.server = server;
         this.blueScore = blueScore;
         this.redScore = redScore;
         this.ballPosition = ballPosition;
+        this.playerName = playerName;
+    }
+
+    public PlayerName getPlayerName() {
+        return this.playerName;
+    }
+
+    public void setPlayerName(PlayerName playerName) {
+        this.playerName = playerName;
     }
 
     public BALL_POSITION getBallPosition() {

@@ -76,16 +76,24 @@ public class MainActivity extends AppCompatActivity {
 
             updateButtonLabels(lastCall.getServer());
 
+            updatePlayerName(lastCall.getPlayerName());
+
             if (count < 2) {
                 resetMatchToInitialState();
                 System.out.println("hit");
                 return;
             }
             updateScoreText(lastCall);
-            // toggleServingIndicator(isBlueTeam);
             moveBallPosition(lastCall.getBallPosition());
         });
 
+    }
+
+    public void updatePlayerName(PlayerName playerName) {
+        binding.txtPlayerBlueTop.setText(playerName.getBlueTop());
+        binding.txtPlayerBlueBottom.setText(playerName.getBlueBottom());
+        binding.txtPlayerRedTop.setText(playerName.getRedTop());
+        binding.txtPlayerRedBottom.setText(playerName.getRedBottom());
     }
 
     public void moveBallPosition(MatchCall.BALL_POSITION ballPosition) {
@@ -123,24 +131,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void toggleServingIndicator(boolean isBlueTeam) {
-        if (isBlueTeam) {
-            rotateVisibility(binding.imgServingBlueTop, binding.imgServingBlueBottom);
-            binding.imgServingRedTop.setVisibility(View.INVISIBLE);
-            binding.imgServingRedBottom.setVisibility(View.INVISIBLE);
-        } else {
-            rotateVisibility(binding.imgServingRedBottom, binding.imgServingRedTop);
-            binding.imgServingBlueTop.setVisibility(View.INVISIBLE);
-            binding.imgServingBlueBottom.setVisibility(View.INVISIBLE);
-        }
-    }
-
-    private void rotateVisibility(View v1, View v2) {
-        boolean isV1Visible = v1.getVisibility() == View.VISIBLE;
-        v1.setVisibility(isV1Visible ? View.INVISIBLE : View.VISIBLE);
-        v2.setVisibility(isV1Visible ? View.VISIBLE : View.INVISIBLE);
-    }
-
     private void resetMatchToInitialState() {
         vmMatch.setMatchCallToInitialState();
 
@@ -168,16 +158,29 @@ public class MainActivity extends AppCompatActivity {
         List<MatchCall> calls = new ArrayList<>(vmMatch.getCalls().getValue());
         MatchCall call = vmMatch.getCall().getValue();
         boolean isBlueServing = call.getCurrentServingTeam() == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
+
+        PlayerName playerName = call.getPlayerName();
+
         if (isBlueServing) {
             call.setBlueScore(call.getBlueScore() + 1);
+
             swapPlayerLabels(binding.txtPlayerBlueTop, binding.txtPlayerBlueBottom);
             call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.BLUE_TOP
                     ? MatchCall.BALL_POSITION.BLUE_BOTTOM : MatchCall.BALL_POSITION.BLUE_TOP);
+
+            String temp = playerName.getBlueTop();
+            playerName.setBlueTop(playerName.getBlueBottom());
+            playerName.setBlueBottom(temp);
         } else {
             call.setRedScore(call.getRedScore() + 1);
+            String temp = playerName.getRedTop();
+            playerName.setRedTop(playerName.getRedBottom());
+            playerName.setRedBottom(temp);
+
             swapPlayerLabels(binding.txtPlayerRedTop, binding.txtPlayerRedBottom);
             call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.RED_TOP ? MatchCall.BALL_POSITION.RED_BOTTOM : MatchCall.BALL_POSITION.RED_TOP);
         }
+        call.setPlayerName(playerName);
         calls.add(call);
         vmMatch.setCalls(calls);
     }
@@ -206,10 +209,12 @@ public class MainActivity extends AppCompatActivity {
             call.setServer(MatchCall.SERVER.TWO);
             if (isBlueServing) {
                 call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.BLUE_TOP ? MatchCall.BALL_POSITION.BLUE_BOTTOM : MatchCall.BALL_POSITION.BLUE_TOP);
+
             } else {
                 call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.RED_TOP ? MatchCall.BALL_POSITION.RED_BOTTOM : MatchCall.BALL_POSITION.RED_TOP);
             }
         }
+
         calls.add(call);
         vmMatch.setCalls(calls);
 
