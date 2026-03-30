@@ -6,6 +6,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -16,33 +17,20 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.pickleball_android.databinding.ActivityMainBinding;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
+/**
+ * MainActivity handles the UI and user interactions for the Pickleball Scoreboard.
+ */
 public class MainActivity extends AppCompatActivity {
 
-    private MatchViewModel viewModel;
+    private MatchViewModel vmMatch;
 
     private ActivityMainBinding binding;
-
-    private void onFullScreen() {
-        EdgeToEdge.enable(this);
-
-        WindowInsetsControllerCompat windowInsetsController =
-                ViewCompat.getWindowInsetsController(getWindow().getDecorView());
-        if (windowInsetsController != null) {
-            // Hide both status bar and navigation bar
-            windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
-            // Make them reappear with a swipe
-            windowInsetsController.setSystemBarsBehavior(
-                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            );
-        }
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            // Remove top and bottom padding to let content fill the entire screen
-            v.setPadding(systemBars.left, 0, systemBars.right, 0);
-            return insets;
-        });
-    }
+    private TextView txtScore;
+    private Button btnFault;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,210 +39,233 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         onFullScreen();
+        initViews();
+        setupViewModel();
+    }
 
-        viewModel = new ViewModelProvider(this).get(MatchViewModel.class);
-        TextView txtScore = binding.kitchenLayout.findViewById(R.id.txtScore);
+    /**
+     * Finds and initializes view references from the binding.
+     */
+    private void initViews() {
+        txtScore = binding.kitchenLayout.findViewById(R.id.txtScore);
+        btnFault = binding.kitchenLayout.findViewById(R.id.btn_fault);
+
+        // Initial serve state
+        // binding.imgServingBlueTop.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Initializes the ViewModel and sets up observers for data changes.
+     */
+    private void setupViewModel() {
+        vmMatch = new ViewModelProvider(this).get(MatchViewModel.class);
+
+        vmMatch.getCalls().observe(this, calls -> {
+            if (vmMatch.getGameIsOver().getValue()) {
+                return;
+            }
+            MatchCall lastCall = vmMatch.getLastCall();
+
+            int count = calls.size();
+
+            if (lastCall == null) return;
+
+            Boolean isBlueTeam = lastCall.getCurrentServingTeam() == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
+
+            checkForWinner(isBlueTeam, lastCall);
+
+            updateButtonLabels(lastCall.getServer());
+
+            if (count < 2) {
+                resetMatchToInitialState();
+                System.out.println("hit");
+                return;
+            }
+
+            // if (!lastCall.getIsAtFaultOrSideOut()) {
+            updatePlayerName(lastCall.getPlayerName());
+            //}
+
+            System.out.println("observer:" + count);
+            updateScoreText(lastCall);
+            moveBallPosition(lastCall.getBallPosition());
+        });
+
+    }
+
+    public void updatePlayerName(PlayerName playerName) {
+        binding.txtPlayerBlueTop.setText(playerName.getBlueTop());
+        binding.txtPlayerBlueBottom.setText(playerName.getBlueBottom());
+        binding.txtPlayerRedTop.setText(playerName.getRedTop());
+        binding.txtPlayerRedBottom.setText(playerName.getRedBottom());
+    }
+
+    public void moveBallPosition(MatchCall.BALL_POSITION ballPosition) {
+        binding.imgServingBlueTop.setVisibility(ballPosition == MatchCall.BALL_POSITION.BLUE_TOP ? View.VISIBLE : View.INVISIBLE);
+        binding.imgServingBlueBottom.setVisibility(ballPosition == MatchCall.BALL_POSITION.BLUE_BOTTOM ? View.VISIBLE : View.INVISIBLE);
+        binding.imgServingRedTop.setVisibility(ballPosition == MatchCall.BALL_POSITION.RED_TOP ? View.VISIBLE : View.INVISIBLE);
+        binding.imgServingRedBottom.setVisibility(ballPosition == MatchCall.BALL_POSITION.RED_BOTTOM ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    private void updateScoreText(MatchCall call) {
+        int blue = call.getBlueScore();
+        int red = call.getRedScore();
+        int server = call.getServer().getValue();
+        boolean isBlueServing = call.getCurrentServingTeam() == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
+
+        // In Pickleball, the serving team's score is mentioned first
+        String formattedScore = isBlueServing
+                ? String.format(Locale.US, "%d-%d-%d", blue, red, server)
+                : String.format(Locale.US, "%d-%d-%d", red, blue, server);
+
+        txtScore.setText(formattedScore);
+    }
+
+    private void updateButtonLabels(MatchCall.SERVER server) {
+        btnFault.setText(server == MatchCall.SERVER.ONE ? "FAULT" : "SIDEOUT");
+    }
+
+    private void checkForWinner(boolean isBlueTeam, MatchCall call) {
+
+        int oppositeScore = isBlueTeam ? call.getRedScore() : call.getBlueScore();
+        int currentScore = isBlueTeam ? call.getBlueScore() : call.getRedScore();
+        if (currentScore >= 11 && (currentScore - oppositeScore) >= 2) {
+            vmMatch.setGameIsOver(true);
+            showWinnerDialog((isBlueTeam ? "Blue" : "Red") + " Team Wins! Final Score: " + currentScore + " - " + oppositeScore + " - " + call.getServer().getValue());
+        }
+    }
+
+    private void resetMatchToInitialState() {
+        vmMatch.setMatchCallToInitialState();
+
+        if (vmMatch.getGameIsOver().getValue()) {
+            vmMatch.setCalls(vmMatch.getInitCalls());
+            vmMatch.setGameIsOver(false);
+        }
+
+        txtScore.setText("0-0-2");
 
         binding.imgServingBlueTop.setVisibility(View.VISIBLE);
+        binding.imgServingBlueBottom.setVisibility(View.INVISIBLE);
+        binding.imgServingRedTop.setVisibility(View.INVISIBLE);
+        binding.imgServingRedBottom.setVisibility(View.INVISIBLE);
 
-        viewModel.getCurrentServingTeam().observe(this, currentServingTeam -> {
-            if (viewModel.getGameIsOver().getValue()) {
-                return;
-            }
-            Boolean isBlue = viewModel.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
-            //  viewModel.setCurrentServingTeam(isBlue ? MatchViewModel.CURRENT_SERVING_TEAM.TEAM_RED : MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
-            if (!isBlue) {
-                binding.imgServingRedBottom.setVisibility(View.VISIBLE);
-                binding.imgServingBlueTop.setVisibility(View.INVISIBLE);
-                binding.imgServingBlueBottom.setVisibility(View.INVISIBLE);
-                String scoreText = String.join("-", viewModel.getRedScore().getValue() + "", viewModel.getBlueScore().getValue() + "", viewModel.getServer().getValue().getValue() + "");
-                txtScore.setText(scoreText);
+        binding.txtPlayerBlueTop.setText("Player 1");
+        binding.txtPlayerBlueBottom.setText("Player 2");
+        binding.txtPlayerRedTop.setText("Player 3");
+        binding.txtPlayerRedBottom.setText("Player 4");
+
+        System.out.println("reset");
+    }
+
+    public void onBtnScoreListener(View v) {
+        List<MatchCall> calls = new ArrayList<>(vmMatch.getCalls().getValue());
+        MatchCall call = vmMatch.getLastCallInstance();
+
+        boolean isBlueServing = call.getCurrentServingTeam() == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
+
+        PlayerName playerName = vmMatch.getPlayerNameInstance(call.getPlayerName());
+
+        if (isBlueServing) {
+            call.setBlueScore(call.getBlueScore() + 1);
+            call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.BLUE_TOP
+                    ? MatchCall.BALL_POSITION.BLUE_BOTTOM : MatchCall.BALL_POSITION.BLUE_TOP);
+
+            String temp = playerName.getBlueTop();
+            playerName.setBlueTop(playerName.getBlueBottom());
+            playerName.setBlueBottom(temp);
+        } else {
+            call.setRedScore(call.getRedScore() + 1);
+            String temp = playerName.getRedTop();
+            playerName.setRedTop(playerName.getRedBottom());
+            playerName.setRedBottom(temp);
+
+            call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.RED_TOP ? MatchCall.BALL_POSITION.RED_BOTTOM : MatchCall.BALL_POSITION.RED_TOP);
+        }
+        call.setPlayerName(playerName);
+        call.setIsAtFaultOrSideOut(false);
+
+        calls.add(call);
+        vmMatch.setCalls(calls);
+        for (MatchCall c : calls) {
+            System.out.println(c.textPrint(c));
+        }
+    }
+
+    /**
+     * XML OnClick listener for the Fault button.
+     */
+    public void onBtnFaultListener(View v) {
+        List<MatchCall> calls = vmMatch.getCalls().getValue();
+        MatchCall call = vmMatch.getLastCallInstance();
+
+        MatchCall.CURRENT_SERVING_TEAM current = call.getCurrentServingTeam();
+        Boolean isBlueServing = current == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
+        if (call.getServer() == MatchCall.SERVER.TWO) {
+            call.setServer(MatchCall.SERVER.ONE);
+            call.setCurrentServingTeam(isBlueServing
+                    ? MatchCall.CURRENT_SERVING_TEAM.TEAM_RED
+                    : MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE);
+            call.setBallPosition(isBlueServing ? MatchCall.BALL_POSITION.RED_BOTTOM : MatchCall.BALL_POSITION.BLUE_TOP);
+        } else {
+            call.setServer(MatchCall.SERVER.TWO);
+            if (isBlueServing) {
+                call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.BLUE_TOP ? MatchCall.BALL_POSITION.BLUE_BOTTOM : MatchCall.BALL_POSITION.BLUE_TOP);
+
             } else {
-                binding.imgServingBlueTop.setVisibility(View.VISIBLE);
-                binding.imgServingRedTop.setVisibility(View.INVISIBLE);
-                binding.imgServingRedBottom.setVisibility(View.INVISIBLE);
-                String scoreText = String.join("-", viewModel.getBlueScore().getValue() + "", viewModel.getRedScore().getValue() + "", viewModel.getServer().getValue().getValue() + "");
-                txtScore.setText(scoreText);
+                call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.RED_TOP ? MatchCall.BALL_POSITION.RED_BOTTOM : MatchCall.BALL_POSITION.RED_TOP);
             }
+        }
+        call.setIsAtFaultOrSideOut(true);
+        calls.add(call);
+        vmMatch.setCalls(calls);
 
-            System.out.println("hit" + currentServingTeam);
-        });
+    }
 
-        viewModel.getServer().observe(this, server -> {
-            if (viewModel.getGameIsOver().getValue()) {
-                return;
-            }
-            Button btnFault = binding.kitchenLayout.findViewById(R.id.btn_fault);
-            btnFault.setText(server == MatchViewModel.SERVER.ONE ? "FAULT" : "SIDEOUT");
-            Boolean isBlue = viewModel.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE;
-            if (isBlue) {
-                String scoreText = String.join("-", viewModel.getBlueScore().getValue() + "", viewModel.getRedScore().getValue() + "", viewModel.getServer().getValue().getValue() + "");
-                txtScore.setText(scoreText);
-            } else {
-                String scoreText = String.join("-", viewModel.getRedScore().getValue() + "", viewModel.getBlueScore().getValue() + "", viewModel.getServer().getValue().getValue() + "");
-                txtScore.setText(scoreText);
-            }
-
-        });
-
-        viewModel.getGameIsOver().observe(this, isGameOver -> {
-            if (!viewModel.getGameIsOver().getValue()) {
-                return;
-            }
-            viewModel.setCurrentServingTeam(MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
-            viewModel.setServer(MatchViewModel.SERVER.TWO);
-            viewModel.setBlueScore(0);
-            viewModel.setRedScore(0);
-            String scoreText = String.join("-", "0", "0", "2");
-            binding.imgServingBlueTop.setVisibility(View.VISIBLE);
-            binding.imgServingBlueBottom.setVisibility(View.INVISIBLE);
-            binding.imgServingRedTop.setVisibility(View.INVISIBLE);
-            binding.imgServingRedBottom.setVisibility(View.INVISIBLE);
-            binding.txtPlayerBlueTop.setText("Player 1");
-            binding.txtPlayerBlueBottom.setText("Player 2");
-            binding.txtPlayerRedBottom.setText("Player 4");
-            binding.txtPlayerRedTop.setText("Player 3");
-            txtScore.setText(scoreText);
-        });
-
-        viewModel.getBlueScore().observe(this, blueScore -> {
-            if (viewModel.getGameIsOver().getValue()) {
-                return;
-            }
-
-            Integer winBlue = viewModel.getBlueScore().getValue() - viewModel.getRedScore().getValue();
-            if (viewModel.getBlueScore().getValue() >= 11 && winBlue >= 2) {
-                System.out.println("Blue Wins");
-                viewModel.setGameIsOver(true);
-                showWinnerDialog("Blue Team Wins!");
-
-                return;
-            }
-
-            String scoreText = String.join("-", blueScore + "", viewModel.getRedScore().getValue() + "", viewModel.getServer().getValue().getValue() + "");
-            txtScore.setText(scoreText);
-
-            if (binding.imgServingBlueBottom.getVisibility() == View.VISIBLE) {
-                binding.imgServingBlueBottom.setVisibility(View.INVISIBLE);
-            } else {
-                binding.imgServingBlueBottom.setVisibility(View.VISIBLE);
-            }
-            if (binding.imgServingBlueTop.getVisibility() == View.VISIBLE) {
-                binding.imgServingBlueTop.setVisibility(View.INVISIBLE);
-            } else {
-                binding.imgServingBlueTop.setVisibility(View.VISIBLE);
-            }
-
-
-        });
-
-        viewModel.getRedScore().observe(this, redScore -> {
-            if (viewModel.getGameIsOver().getValue()) {
-                return;
-            }
-
-            Integer winRed = viewModel.getRedScore().getValue() - viewModel.getBlueScore().getValue();
-            if (viewModel.getRedScore().getValue() >= 11 && winRed >= 2) {
-                System.out.println("Red Wins");
-                viewModel.setGameIsOver(true);
-                showWinnerDialog("Red Team Wins!");
-
-                return;
-            }
-
-            if (binding.imgServingRedBottom.getVisibility() == View.VISIBLE) {
-                binding.imgServingRedBottom.setVisibility(View.INVISIBLE);
-            } else {
-                binding.imgServingRedBottom.setVisibility(View.VISIBLE);
-            }
-            if (binding.imgServingRedTop.getVisibility() == View.VISIBLE) {
-                binding.imgServingRedTop.setVisibility(View.INVISIBLE);
-            } else {
-                binding.imgServingRedTop.setVisibility(View.VISIBLE);
-            }
-
-            String scoreText = String.join("-", redScore + "", viewModel.getBlueScore().getValue() + "", viewModel.getServer().getValue().getValue() + "");
-            txtScore.setText(scoreText);
-
+    /**
+     * Enables EdgeToEdge and hides system bars.
+     */
+    private void onFullScreen() {
+        EdgeToEdge.enable(this);
+        WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(getWindow().getDecorView());
+        if (controller != null) {
+            controller.hide(WindowInsetsCompat.Type.systemBars());
+            controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(bars.left, 0, bars.right, 0);
+            return insets;
         });
     }
 
-    private void showWinnerDialog(String winnerMessage) {
+    public void onBtnListenerUndo(View view) {
+        vmMatch.undoCall();
+
+    }
+
+    private void showWinnerDialog(String message) {
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Game Over")
-                .setMessage(winnerMessage)
-                .setPositiveButton("OK", (dialogInterface, which) -> {
-                    dialogInterface.dismiss();
-                    viewModel.setGameIsOver(false);
+                .setMessage(message)
+                .setPositiveButton("OK", (d, w) -> {
+                    resetMatchToInitialState();
+                    d.dismiss();
                 })
                 .setCancelable(false)
                 .create();
 
         dialog.show();
+        applyFullScreenFlags(dialog);
+    }
 
+    private void applyFullScreenFlags(@NonNull AlertDialog dialog) {
         if (dialog.getWindow() != null) {
-            WindowInsetsControllerCompat windowInsetsController =
-                    ViewCompat.getWindowInsetsController(dialog.getWindow().getDecorView());
-            if (windowInsetsController != null) {
-                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
-                windowInsetsController.setSystemBarsBehavior(
-                        WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-                );
+            WindowInsetsControllerCompat controller = ViewCompat.getWindowInsetsController(dialog.getWindow().getDecorView());
+            if (controller != null) {
+                controller.hide(WindowInsetsCompat.Type.systemBars());
+                controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
             }
         }
     }
-
-    public void onBtnScoreListener(View v) {
-        //scoring
-        if (viewModel.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE) {
-            viewModel.setBlueScore(viewModel.getBlueScore().getValue() + 1);
-            String txtPlayerBlueTopValue = binding.txtPlayerBlueTop.getText().toString();
-            String txtPlayerBlueBottomValue = binding.txtPlayerBlueBottom.getText().toString();
-            binding.txtPlayerBlueTop.setText(txtPlayerBlueBottomValue);
-            binding.txtPlayerBlueBottom.setText(txtPlayerBlueTopValue);
-        } else {
-            viewModel.setRedScore(viewModel.getRedScore().getValue() + 1);
-            String txtPlayerRedTopValue = binding.txtPlayerRedTop.getText().toString();
-            String txtPlayerRedBottomValue = binding.txtPlayerRedBottom.getText().toString();
-            binding.txtPlayerRedTop.setText(txtPlayerRedBottomValue);
-            binding.txtPlayerRedBottom.setText(txtPlayerRedTopValue);
-        }
-    }
-
-    public void onBtnFaultListener(View v) {
-        if (viewModel.getServer().getValue() == MatchViewModel.SERVER.TWO) {
-            viewModel.setServer(MatchViewModel.SERVER.ONE);
-            System.out.println("fault" + viewModel.getServer().getValue());
-            viewModel.setCurrentServingTeam(viewModel.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE ? MatchViewModel.CURRENT_SERVING_TEAM.TEAM_RED : MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE);
-            return;
-        }
-
-        if (viewModel.getCurrentServingTeam().getValue() == MatchViewModel.CURRENT_SERVING_TEAM.TEAM_BLUE) {
-            if (binding.imgServingBlueBottom.getVisibility() == View.VISIBLE) {
-                binding.imgServingBlueBottom.setVisibility(View.INVISIBLE);
-            } else {
-                binding.imgServingBlueBottom.setVisibility(View.VISIBLE);
-            }
-            if (binding.imgServingBlueTop.getVisibility() == View.VISIBLE) {
-                binding.imgServingBlueTop.setVisibility(View.INVISIBLE);
-            } else {
-                binding.imgServingBlueTop.setVisibility(View.VISIBLE);
-            }
-
-        } else {
-            if (binding.imgServingRedBottom.getVisibility() == View.VISIBLE) {
-                binding.imgServingRedBottom.setVisibility(View.INVISIBLE);
-            } else {
-                binding.imgServingRedBottom.setVisibility(View.VISIBLE);
-            }
-            if (binding.imgServingRedTop.getVisibility() == View.VISIBLE) {
-                binding.imgServingRedTop.setVisibility(View.INVISIBLE);
-            } else {
-                binding.imgServingRedTop.setVisibility(View.VISIBLE);
-            }
-        }
-        viewModel.setServer(MatchViewModel.SERVER.TWO);
-
-    }
-
 }
