@@ -1,6 +1,6 @@
 package com.example.pickleball_android;
 
-public class MatchCall {
+public class MatchTrack {
 
     public enum CURRENT_SERVING_TEAM {
         TEAM_BLUE,
@@ -29,22 +29,6 @@ public class MatchCall {
         RED_BOTTOM
     }
 
-    public enum PLAYER_NAME {
-        PLAYER_1("Player 1"),
-        PLAYER_2("Player 2"),
-        PLAYER_3("Player 3"),
-        PLAYER_4("Player 4");
-        private final String value;
-
-        PLAYER_NAME(String value) {
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-    }
-
     private CURRENT_SERVING_TEAM currentServingTeam;
     private SERVER server;
     private Integer blueScore;
@@ -55,7 +39,7 @@ public class MatchCall {
 
     private Boolean isAtFaultOrSideOut;
 
-    public MatchCall(CURRENT_SERVING_TEAM currentServingTeam, SERVER server, Integer blueScore, Integer redScore, BALL_POSITION ballPosition, PlayerName playerName, Boolean isAtFaultOrSideOut) {
+    public MatchTrack(CURRENT_SERVING_TEAM currentServingTeam, SERVER server, Integer blueScore, Integer redScore, BALL_POSITION ballPosition, PlayerName playerName, Boolean isAtFaultOrSideOut) {
         this.currentServingTeam = currentServingTeam;
         this.server = server;
         this.blueScore = blueScore;
@@ -121,7 +105,7 @@ public class MatchCall {
         this.redScore = redScore;
     }
 
-    public String textPrint(MatchCall call) {
+    public String textPrint(MatchTrack call) {
         return "PlayerNameBlueTop(:" + call.playerName.getBlueTop() + ",Current Serving Team: " + call.currentServingTeam + ", Server: " + call.server + ", Blue Score: " + call.blueScore + ", Red Score: " + call.redScore + "";
     }
 }

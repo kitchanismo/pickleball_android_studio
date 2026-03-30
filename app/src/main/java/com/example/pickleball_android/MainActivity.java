@@ -60,35 +60,30 @@ public class MainActivity extends AppCompatActivity {
     private void setupViewModel() {
         vmMatch = new ViewModelProvider(this).get(MatchViewModel.class);
 
-        vmMatch.getCalls().observe(this, calls -> {
+        vmMatch.getTracks().observe(this, tracks -> {
             if (vmMatch.getGameIsOver().getValue()) {
                 return;
             }
-            MatchCall lastCall = vmMatch.getLastCall();
+            MatchTrack lastTrack = vmMatch.getLastTrack();
 
-            int count = calls.size();
+            int count = tracks.size();
 
-            if (lastCall == null) return;
+            if (lastTrack == null) return;
 
-            Boolean isBlueTeam = lastCall.getCurrentServingTeam() == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
+            Boolean isBlueTeam = lastTrack.getCurrentServingTeam() == MatchTrack.CURRENT_SERVING_TEAM.TEAM_BLUE;
 
-            checkForWinner(isBlueTeam, lastCall);
+            checkForWinner(isBlueTeam, lastTrack);
 
-            updateButtonLabels(lastCall.getServer());
+            updateButtonLabels(lastTrack.getServer());
 
             if (count < 2) {
                 resetMatchToInitialState();
-                System.out.println("hit");
                 return;
             }
 
-            // if (!lastCall.getIsAtFaultOrSideOut()) {
-            updatePlayerName(lastCall.getPlayerName());
-            //}
-
-            System.out.println("observer:" + count);
-            updateScoreText(lastCall);
-            moveBallPosition(lastCall.getBallPosition());
+            updatePlayerName(lastTrack.getPlayerName());
+            updateScoreText(lastTrack);
+            moveBallPosition(lastTrack.getBallPosition());
         });
 
     }
@@ -100,18 +95,18 @@ public class MainActivity extends AppCompatActivity {
         binding.txtPlayerRedBottom.setText(playerName.getRedBottom());
     }
 
-    public void moveBallPosition(MatchCall.BALL_POSITION ballPosition) {
-        binding.imgServingBlueTop.setVisibility(ballPosition == MatchCall.BALL_POSITION.BLUE_TOP ? View.VISIBLE : View.INVISIBLE);
-        binding.imgServingBlueBottom.setVisibility(ballPosition == MatchCall.BALL_POSITION.BLUE_BOTTOM ? View.VISIBLE : View.INVISIBLE);
-        binding.imgServingRedTop.setVisibility(ballPosition == MatchCall.BALL_POSITION.RED_TOP ? View.VISIBLE : View.INVISIBLE);
-        binding.imgServingRedBottom.setVisibility(ballPosition == MatchCall.BALL_POSITION.RED_BOTTOM ? View.VISIBLE : View.INVISIBLE);
+    public void moveBallPosition(MatchTrack.BALL_POSITION ballPosition) {
+        binding.imgServingBlueTop.setVisibility(ballPosition == MatchTrack.BALL_POSITION.BLUE_TOP ? View.VISIBLE : View.INVISIBLE);
+        binding.imgServingBlueBottom.setVisibility(ballPosition == MatchTrack.BALL_POSITION.BLUE_BOTTOM ? View.VISIBLE : View.INVISIBLE);
+        binding.imgServingRedTop.setVisibility(ballPosition == MatchTrack.BALL_POSITION.RED_TOP ? View.VISIBLE : View.INVISIBLE);
+        binding.imgServingRedBottom.setVisibility(ballPosition == MatchTrack.BALL_POSITION.RED_BOTTOM ? View.VISIBLE : View.INVISIBLE);
     }
 
-    private void updateScoreText(MatchCall call) {
-        int blue = call.getBlueScore();
-        int red = call.getRedScore();
-        int server = call.getServer().getValue();
-        boolean isBlueServing = call.getCurrentServingTeam() == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
+    private void updateScoreText(MatchTrack track) {
+        int blue = track.getBlueScore();
+        int red = track.getRedScore();
+        int server = track.getServer().getValue();
+        boolean isBlueServing = track.getCurrentServingTeam() == MatchTrack.CURRENT_SERVING_TEAM.TEAM_BLUE;
 
         // In Pickleball, the serving team's score is mentioned first
         String formattedScore = isBlueServing
@@ -121,25 +116,25 @@ public class MainActivity extends AppCompatActivity {
         txtScore.setText(formattedScore);
     }
 
-    private void updateButtonLabels(MatchCall.SERVER server) {
-        btnFault.setText(server == MatchCall.SERVER.ONE ? "FAULT" : "SIDEOUT");
+    private void updateButtonLabels(MatchTrack.SERVER server) {
+        btnFault.setText(server == MatchTrack.SERVER.ONE ? "FAULT" : "SIDEOUT");
     }
 
-    private void checkForWinner(boolean isBlueTeam, MatchCall call) {
+    private void checkForWinner(boolean isBlueTeam, MatchTrack track) {
 
-        int oppositeScore = isBlueTeam ? call.getRedScore() : call.getBlueScore();
-        int currentScore = isBlueTeam ? call.getBlueScore() : call.getRedScore();
+        int oppositeScore = isBlueTeam ? track.getRedScore() : track.getBlueScore();
+        int currentScore = isBlueTeam ? track.getBlueScore() : track.getRedScore();
         if (currentScore >= 11 && (currentScore - oppositeScore) >= 2) {
             vmMatch.setGameIsOver(true);
-            showWinnerDialog((isBlueTeam ? "Blue" : "Red") + " Team Wins! Final Score: " + currentScore + " - " + oppositeScore + " - " + call.getServer().getValue());
+            showWinnerDialog((isBlueTeam ? "Blue" : "Red") + " Team Wins! Final Score: " + currentScore + " - " + oppositeScore + " - " + track.getServer().getValue());
         }
     }
 
     private void resetMatchToInitialState() {
-        vmMatch.setMatchCallToInitialState();
+        vmMatch.setMatchTrackToInitialState();
 
         if (vmMatch.getGameIsOver().getValue()) {
-            vmMatch.setCalls(vmMatch.getInitCalls());
+            vmMatch.setTracks(vmMatch.getInitTracks());
             vmMatch.setGameIsOver(false);
         }
 
@@ -159,35 +154,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onBtnScoreListener(View v) {
-        List<MatchCall> calls = new ArrayList<>(vmMatch.getCalls().getValue());
-        MatchCall call = vmMatch.getLastCallInstance();
+        List<MatchTrack> tracks = new ArrayList<>(vmMatch.getTracks().getValue());
+        MatchTrack track = vmMatch.getLastTrackInstance();
 
-        boolean isBlueServing = call.getCurrentServingTeam() == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
+        boolean isBlueServing = track.getCurrentServingTeam() == MatchTrack.CURRENT_SERVING_TEAM.TEAM_BLUE;
 
-        PlayerName playerName = vmMatch.getPlayerNameInstance(call.getPlayerName());
+        PlayerName playerName = vmMatch.getPlayerNameInstance(track.getPlayerName());
 
         if (isBlueServing) {
-            call.setBlueScore(call.getBlueScore() + 1);
-            call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.BLUE_TOP
-                    ? MatchCall.BALL_POSITION.BLUE_BOTTOM : MatchCall.BALL_POSITION.BLUE_TOP);
+            track.setBlueScore(track.getBlueScore() + 1);
+            track.setBallPosition(track.getBallPosition() == MatchTrack.BALL_POSITION.BLUE_TOP
+                    ? MatchTrack.BALL_POSITION.BLUE_BOTTOM : MatchTrack.BALL_POSITION.BLUE_TOP);
 
             String temp = playerName.getBlueTop();
             playerName.setBlueTop(playerName.getBlueBottom());
             playerName.setBlueBottom(temp);
         } else {
-            call.setRedScore(call.getRedScore() + 1);
+            track.setRedScore(track.getRedScore() + 1);
             String temp = playerName.getRedTop();
             playerName.setRedTop(playerName.getRedBottom());
             playerName.setRedBottom(temp);
 
-            call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.RED_TOP ? MatchCall.BALL_POSITION.RED_BOTTOM : MatchCall.BALL_POSITION.RED_TOP);
+            track.setBallPosition(track.getBallPosition() == MatchTrack.BALL_POSITION.RED_TOP ? MatchTrack.BALL_POSITION.RED_BOTTOM : MatchTrack.BALL_POSITION.RED_TOP);
         }
-        call.setPlayerName(playerName);
-        call.setIsAtFaultOrSideOut(false);
+        track.setPlayerName(playerName);
+        track.setIsAtFaultOrSideOut(false);
 
-        calls.add(call);
-        vmMatch.setCalls(calls);
-        for (MatchCall c : calls) {
+        tracks.add(track);
+        vmMatch.setTracks(tracks);
+        for (MatchTrack c : tracks) {
             System.out.println(c.textPrint(c));
         }
     }
@@ -196,29 +191,29 @@ public class MainActivity extends AppCompatActivity {
      * XML OnClick listener for the Fault button.
      */
     public void onBtnFaultListener(View v) {
-        List<MatchCall> calls = vmMatch.getCalls().getValue();
-        MatchCall call = vmMatch.getLastCallInstance();
+        List<MatchTrack> tracks = vmMatch.getTracks().getValue();
+        MatchTrack track = vmMatch.getLastTrackInstance();
 
-        MatchCall.CURRENT_SERVING_TEAM current = call.getCurrentServingTeam();
-        Boolean isBlueServing = current == MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE;
-        if (call.getServer() == MatchCall.SERVER.TWO) {
-            call.setServer(MatchCall.SERVER.ONE);
-            call.setCurrentServingTeam(isBlueServing
-                    ? MatchCall.CURRENT_SERVING_TEAM.TEAM_RED
-                    : MatchCall.CURRENT_SERVING_TEAM.TEAM_BLUE);
-            call.setBallPosition(isBlueServing ? MatchCall.BALL_POSITION.RED_BOTTOM : MatchCall.BALL_POSITION.BLUE_TOP);
+        MatchTrack.CURRENT_SERVING_TEAM current = track.getCurrentServingTeam();
+        Boolean isBlueServing = current == MatchTrack.CURRENT_SERVING_TEAM.TEAM_BLUE;
+        if (track.getServer() == MatchTrack.SERVER.TWO) {
+            track.setServer(MatchTrack.SERVER.ONE);
+            track.setCurrentServingTeam(isBlueServing
+                    ? MatchTrack.CURRENT_SERVING_TEAM.TEAM_RED
+                    : MatchTrack.CURRENT_SERVING_TEAM.TEAM_BLUE);
+            track.setBallPosition(isBlueServing ? MatchTrack.BALL_POSITION.RED_BOTTOM : MatchTrack.BALL_POSITION.BLUE_TOP);
         } else {
-            call.setServer(MatchCall.SERVER.TWO);
+            track.setServer(MatchTrack.SERVER.TWO);
             if (isBlueServing) {
-                call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.BLUE_TOP ? MatchCall.BALL_POSITION.BLUE_BOTTOM : MatchCall.BALL_POSITION.BLUE_TOP);
+                track.setBallPosition(track.getBallPosition() == MatchTrack.BALL_POSITION.BLUE_TOP ? MatchTrack.BALL_POSITION.BLUE_BOTTOM : MatchTrack.BALL_POSITION.BLUE_TOP);
 
             } else {
-                call.setBallPosition(call.getBallPosition() == MatchCall.BALL_POSITION.RED_TOP ? MatchCall.BALL_POSITION.RED_BOTTOM : MatchCall.BALL_POSITION.RED_TOP);
+                track.setBallPosition(track.getBallPosition() == MatchTrack.BALL_POSITION.RED_TOP ? MatchTrack.BALL_POSITION.RED_BOTTOM : MatchTrack.BALL_POSITION.RED_TOP);
             }
         }
-        call.setIsAtFaultOrSideOut(true);
-        calls.add(call);
-        vmMatch.setCalls(calls);
+        track.setIsAtFaultOrSideOut(true);
+        tracks.add(track);
+        vmMatch.setTracks(tracks);
 
     }
 
@@ -240,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onBtnListenerUndo(View view) {
-        vmMatch.undoCall();
+        vmMatch.undoTrack();
 
     }
 
