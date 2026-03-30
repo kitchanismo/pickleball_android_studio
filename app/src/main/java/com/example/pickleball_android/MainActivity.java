@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Game Over")
                 .setMessage(message)
-                .setPositiveButton("OK", (d, w) -> {
+                .setPositiveButton("NEW GAME", (d, w) -> {
                     resetMatchToInitialState();
                     d.dismiss();
                 })

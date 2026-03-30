@@ -5,6 +5,9 @@
     android:gravity="center"
     android:orientation="vertical"
     android:padding="16dp"
+    android:layout_marginTop="6dp"
+    android:layout_marginBottom="6dp"
+    android:background="@color/white"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <Button
